@@ -588,22 +588,55 @@
         },
       ];
 
-      const ACHIEVEMENTS = [
-        { id: "ach_ch3", name: "雨夜回声", desc: "通关第3章", reward: { hongdou: 2, sugar: 1 } },
-        { id: "ach_ch4", name: "未寄出的信", desc: "通关第4章", reward: { hongdou: 3 } },
-        { id: "ach_ch5", name: "逆风公路", desc: "通关第5章", reward: { hoofprint: 2 } },
-        { id: "ach_mirror", name: "镜中镜", desc: "触发隐藏剧情", reward: { hongdou: 1 } },
-        { id: "ach_combo", name: "三抽屉连锁", desc: "一章内A/B/C各完成一次", reward: { sugar: 1, hoofprint: 1 } },
-        { id: "ach_speed", name: "速通选手", desc: "章节用时<9分钟", reward: { hongdou: 2 } },
-        { id: "ach_collect", name: "九宫格收集", desc: "解锁9种结局", reward: { hongdou: 3 } },
-        { id: "ach_vote", name: "议会出席", desc: "完成一次投票", reward: { sugar: 1 } },
-        { id: "ach_ugc", name: "创意工坊", desc: "发布一条UGC关卡", reward: { hongdou: 1 } },
-        { id: "ach_king", name: "逆风王", desc: "成功称王一次", reward: { hoofprint: 1 } },
-        { id: "ach_heal", name: "治愈胜利", desc: "达成治愈胜利一次", reward: { sugar: 1 } },
-        { id: "ach_vn_end5", name: "初见多结局", desc: "解锁5个视觉小说结局", reward: { hongdou: 2 } },
-        { id: "ach_vn_end20", name: "全分支探索者", desc: "解锁20个视觉小说结局", reward: { hongdou: 4, sugar: 2 } },
-        { id: "ach_vn_easter3", name: "彩蛋猎人", desc: "收集3个视觉小说彩蛋", reward: { hoofprint: 1 } },
+      let ACHIEVEMENTS = [
+        { id: "ach_ch3", name: "雨夜回声", desc: "通关第3章", tier: "silver", reward: { hongdou: 2, sugar: 1 } },
+        { id: "ach_ch4", name: "未寄出的信", desc: "通关第4章", tier: "silver", reward: { hongdou: 3 } },
+        { id: "ach_ch5", name: "逆风公路", desc: "通关第5章", tier: "silver", reward: { hoofprint: 2 } },
+        { id: "ach_mirror", name: "镜中镜", desc: "触发隐藏剧情", tier: "gold", reward: { hongdou: 1 } },
+        { id: "ach_combo", name: "三抽屉连锁", desc: "一章内A/B/C各完成一次", tier: "silver", reward: { sugar: 1, hoofprint: 1 } },
+        { id: "ach_speed", name: "速通选手", desc: "章节用时<9分钟", tier: "gold", reward: { hongdou: 2 } },
+        { id: "ach_collect", name: "九宫格收集", desc: "解锁9种结局", tier: "gold", reward: { hongdou: 3 } },
+        { id: "ach_vote", name: "议会出席", desc: "完成一次投票", tier: "bronze", reward: { sugar: 1 } },
+        { id: "ach_ugc", name: "创意工坊", desc: "发布一条UGC关卡", tier: "bronze", reward: { hongdou: 1 } },
+        { id: "ach_king", name: "逆风王", desc: "成功称王一次", tier: "gold", reward: { hoofprint: 1 } },
+        { id: "ach_heal", name: "治愈胜利", desc: "达成治愈胜利一次", tier: "silver", reward: { sugar: 1 } },
+        { id: "ach_vn_end5", name: "初见多结局", desc: "解锁5个视觉小说结局", tier: "silver", reward: { hongdou: 2 } },
+        { id: "ach_vn_end20", name: "全分支探索者", desc: "解锁20个视觉小说结局", tier: "platinum", reward: { hongdou: 4, sugar: 2 } },
+        { id: "ach_vn_easter3", name: "彩蛋猎人", desc: "收集3个视觉小说彩蛋", tier: "gold", reward: { hoofprint: 1 } },
       ];
+
+      function ensureAchievements100() {
+        const base = ACHIEVEMENTS.slice();
+        const byId = {};
+        for (let i = 0; i < base.length; i++) byId[base[i].id] = 1;
+        const mk = (id, name, desc, tier, reward) => ({ id, name, desc, tier, reward });
+        const pool = [
+          mk("ach_modeA_10", "呼吸成瘾", "A模式累计完成10次", "bronze", { sugar: 1 }),
+          mk("ach_modeB_10", "剪贴成诗", "B模式累计完成10次", "bronze", { hongdou: 1 }),
+          mk("ach_modeC_10", "逆风常客", "C模式累计完成10次", "bronze", { hoofprint: 1 }),
+          mk("ach_battle_1", "第一次挥拳", "完成一次挑战战斗", "bronze", { hongdou: 1 }),
+          mk("ach_battle_20", "连击工厂", "挑战战斗累计20场胜利", "silver", { hongdou: 2 }),
+          mk("ach_map5", "五张地图", "在5张地图各完成一次战斗", "gold", { sugar: 2 }),
+          mk("ach_item20", "背包鼓起", "获得20件装备/道具", "silver", { hongdou: 2 }),
+          mk("ach_plat", "你不是你以为的你", "解锁任意铂金成就", "platinum", { hongdou: 5, sugar: 3 }),
+        ];
+        for (let i = 0; i < pool.length; i++) if (!byId[pool[i].id]) base.push(pool[i]);
+        const tierCycle = ["bronze", "silver", "gold", "platinum"];
+        const namePool = ["边界练习", "情绪电量", "撤回勇气", "不内耗", "走廊回声", "已读不回", "深夜自救", "松弛感", "把话说完", "别回头"];
+        for (let i = 0; base.length < 100 && i < 300; i++) {
+          const tier = tierCycle[i % 4];
+          const id = `ach_auto_${i}_${tier}`;
+          if (byId[id]) continue;
+          byId[id] = 1;
+          const nm = namePool[i % namePool.length];
+          const name = `${nm}${i + 1}`;
+          const desc = tier === "platinum" ? "完成一条极难的自我约定" : tier === "gold" ? "完成一条较难的自我约定" : tier === "silver" ? "完成一条日常约定" : "完成一次小动作";
+          const reward = tier === "platinum" ? { hongdou: 3, sugar: 2, hoofprint: 2 } : tier === "gold" ? { hongdou: 2, sugar: 1 } : tier === "silver" ? { hongdou: 1 } : { sugar: 1 };
+          base.push(mk(id, name, desc, tier, reward));
+        }
+        ACHIEVEMENTS = base;
+      }
+      ensureAchievements100();
 
       function defaultState() {
         const ts = now();
@@ -620,6 +653,8 @@
           echoPool: [],
           storyHist: [],
           ugc: { items: [] },
+          inv: { items: [], equip: { weapon: null, charm: null, coat: null } },
+          skills: { points: 0, spent: {}, trees: { mind: {}, bond: {}, motion: {} } },
           settings: {
             audioOn: false,
             voiceOn: false,
@@ -634,7 +669,24 @@
             perfMode: false,
             showFps: false,
           },
-          flow: { scene: "hub", mode: "fast", run: null, chapter: null, toast: "", ugcEditStartedAt: 0, ripples: [] },
+          flow: {
+            scene: "hub",
+            mode: "fast",
+            run: null,
+            chapter: null,
+            toast: "",
+            ugcEditStartedAt: 0,
+            ripples: [],
+            helpScroll: 0,
+            drawers: null,
+          },
+          telemetry: {
+            installId: seedFrom([navigator.userAgent || "ua", String(now()), String(Math.random())]),
+            sessions: [],
+            events: [],
+            ab: { group: "", assignedAt: 0 },
+          },
+          challenge: { daily: {}, weekly: {}, best: { daily: 0, weekly: 0 }, board: { daily: [], weekly: [] } },
           vn: { progress: {}, read: {} },
           vn2: {
             config: null,
@@ -668,6 +720,8 @@
             lastChapterId: "",
             lastChapterStartAt: 0,
             lastSeed: "",
+            modeTutorSeen: { A: 0, B: 0, C: 0 },
+            modeLast: { A: { best: 0, calm: 0, tol: 0.12, ts: 0 }, B: { len: 0, sealed: 0, ts: 0 }, C: { hit: 0, lane: 1, drift: 0, ts: 0 } },
           },
         };
       }
@@ -685,15 +739,34 @@
           flow: { ...b.flow, ...(s.flow || {}) },
           stats: { ...b.stats, ...(s.stats || {}) },
           ugc: { ...b.ugc, ...(s.ugc || {}) },
+          inv: { ...b.inv, ...(s.inv || {}) },
+          skills: { ...b.skills, ...(s.skills || {}) },
           vn: { ...b.vn, ...(s.vn || {}) },
           vn2: { ...b.vn2, ...(s.vn2 || {}) },
           achievements: { ...b.achievements, ...(s.achievements || {}) },
           puzzle: { ...b.puzzle, ...(s.puzzle || {}) },
           drawerMeta: { ...b.drawerMeta, ...(s.drawerMeta || {}) },
+          telemetry: { ...b.telemetry, ...(s.telemetry || {}) },
+          challenge: { ...b.challenge, ...(s.challenge || {}) },
         };
       }
+      let saveLastAt = 0;
+      let savePending = false;
       function saveState() {
+        const t = now();
+        if (t - saveLastAt < 250) {
+          savePending = true;
+          return;
+        }
+        saveLastAt = t;
+        savePending = false;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+      function flushSaveState() {
+        if (!savePending) return;
+        const t = now();
+        if (t - saveLastAt < 250) return;
+        saveState();
       }
 
       let state = loadState();
@@ -721,6 +794,537 @@
           toast(`抽屉${moduleId} 等级提升：Lv.${lv}`);
           audioSfx("crown");
         }
+      }
+
+      function ensureDrawers() {
+        const f = state.flow;
+        if (f.drawers && typeof f.drawers === "object") return;
+        f.drawers = {
+          active: "",
+          rightTab: "tasks",
+          swipeDx: 0,
+          items: {
+            inv: { id: "inv", side: "left", p: 0, target: 0, w: 0 },
+            right: { id: "right", side: "right", p: 0, target: 0, w: 0 },
+            quick: { id: "quick", side: "bottom", p: 0, target: 0, h: 0 },
+          },
+        };
+      }
+
+      function anyDrawerOpen() {
+        ensureDrawers();
+        const ds = state.flow.drawers.items;
+        for (const k in ds) if (ds[k] && ds[k].p > 0.01) return true;
+        return false;
+      }
+
+      function openDrawer(id) {
+        ensureDrawers();
+        const ds = state.flow.drawers.items;
+        for (const k in ds) if (ds[k]) ds[k].target = 0;
+        if (ds[id]) ds[id].target = 1;
+        state.flow.drawers.active = id;
+        saveState();
+      }
+      function openRightTab(tab) {
+        ensureDrawers();
+        state.flow.drawers.rightTab = tab;
+        openDrawer("right");
+      }
+      function closeDrawer(id) {
+        ensureDrawers();
+        const ds = state.flow.drawers.items;
+        if (id) {
+          if (ds[id]) ds[id].target = 0;
+        } else {
+          for (const k in ds) if (ds[k]) ds[k].target = 0;
+        }
+        if (state.flow.drawers.active === id) state.flow.drawers.active = "";
+        saveState();
+      }
+
+      function drawerDims(d) {
+        if (d.side === "bottom") {
+          d.h = clamp(Math.round(ah * 0.42), 240, 420);
+        } else {
+          d.w = clamp(Math.round(aw * 0.78), 280, 430);
+        }
+      }
+
+      function drawGlobalDrawers() {
+        ensureDrawers();
+        const ds = state.flow.drawers.items;
+        for (const k in ds) drawerDims(ds[k]);
+
+        for (const k in ds) {
+          const d = ds[k];
+          d.p = lerp(d.p, d.target, 0.14);
+          if (Math.abs(d.p - d.target) < 0.002) d.p = d.target;
+        }
+
+        const scrimP = Math.max(ds.inv.p, ds.right.p, ds.quick.p);
+        if (scrimP > 0.01) {
+          ctx.fillStyle = `rgba(0,0,0,${0.55 * scrimP})`;
+          ctx.fillRect(0, 0, aw, ah);
+          hot("drawerScrim", 0, 0, aw, ah, () => closeDrawer(), () => closeDrawer());
+        }
+
+        drawOneDrawer(ds.inv);
+        drawOneDrawer(ds.right);
+        drawBottomDrawer(ds.quick);
+
+        if (ds.inv.p < 0.01) hot("drag_inv_edge", 0, insetTop, 14, ah - insetTop - insetBottom, () => openDrawer("inv"));
+        if (ds.right.p < 0.01) {
+          hot("drag_right_edge", aw - 14, insetTop, 14, ah - insetTop - insetBottom, () => openRightTab("tasks"));
+        }
+        if (ds.quick.p < 0.01) hot("drag_quick_edge", 0, ah - insetBottom - 14, aw, 14, () => openDrawer("quick"));
+      }
+
+      function drawerHeader(id, x, y, w, title, onClose) {
+        rrPath(x, y, w, 56, 16);
+        ctx.fillStyle = "rgba(0,0,0,0.22)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.12)";
+        ctx.stroke();
+        ctx.fillStyle = "rgba(255,255,255,0.92)";
+        ctx.font = `900 ${Math.round(14 * uiScale)}px ${fontSans}`;
+        ctx.fillText(title, x + 14, y + 34);
+        btn(`drawerCloseBtn_${id}`, x + w - 56, y + 10, 46, 36, "×", "ghost", onClose);
+      }
+
+      function drawOneDrawer(d) {
+        if (!d || d.p <= 0.01 || d.side === "bottom") return;
+        const w = d.w;
+        const h = ah - insetTop - insetBottom;
+        const y = insetTop;
+        const x = d.side === "left" ? lerp(-w, 0, easeOutCubic(d.p)) : lerp(aw, aw - w, easeOutCubic(d.p));
+        ctx.save();
+        ctx.shadowColor = "rgba(0,0,0,0.55)";
+        ctx.shadowBlur = 26 * d.p;
+        rrPath(x, y, w, h, 18);
+        ctx.fillStyle = "rgba(10,14,24,0.92)";
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = "rgba(255,255,255,0.12)";
+        ctx.stroke();
+        ctx.restore();
+
+        const innerX = x + 12;
+        const innerW = w - 24;
+        const cy = y + 12;
+
+        if (d.id === "inv") drawerHeader("inv", innerX, cy, innerW, "角色背包", () => closeDrawer("inv"));
+        if (d.id === "right") {
+          const tab = state.flow.drawers.rightTab || "tasks";
+          const title = tab === "tasks" ? "任务日志" : tab === "ach" ? "成就面板" : "系统设置";
+          drawerHeader("right", innerX, cy, innerW, title, () => closeDrawer("right"));
+        }
+
+        const by = cy + 70;
+        rrPath(innerX, by, innerW, h - 94, 16);
+        ctx.fillStyle = "rgba(255,255,255,0.04)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.10)";
+        ctx.stroke();
+
+        if (d.id === "inv") drawDrawerInv(innerX, by, innerW, h - 94);
+        if (d.id === "right") {
+          drawDrawerRightTabs(innerX, by, innerW, h - 94);
+        }
+      }
+
+      function drawBottomDrawer(d) {
+        if (!d || d.p <= 0.01) return;
+        const hh = d.h;
+        const w = aw;
+        const x = 0;
+        const y = lerp(ah + 2, ah - hh - insetBottom, easeOutCubic(d.p));
+        ctx.save();
+        ctx.shadowColor = "rgba(0,0,0,0.55)";
+        ctx.shadowBlur = 28 * d.p;
+        rrPath(x + 14, y, w - 28, hh, 18);
+        ctx.fillStyle = "rgba(10,14,24,0.92)";
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = "rgba(255,255,255,0.12)";
+        ctx.stroke();
+        ctx.restore();
+        const innerX = x + 26;
+        const innerW = w - 52;
+        drawerHeader("quick", innerX, y + 12, innerW, "快捷道具栏", () => closeDrawer("quick"));
+        drawDrawerQuick(innerX, y + 82, innerW, hh - 96);
+      }
+
+      function drawDrawerRightTabs(x, y, w, h) {
+        const f = state.flow.drawers;
+        const tab = f.rightTab || "tasks";
+        const bw = (w - 28) / 3;
+        btn("rtTabTasks", x + 14, y + 14, bw, 40, "任务", tab === "tasks" ? "primary" : "ghost", () => {
+          f.rightTab = "tasks";
+          saveState();
+        });
+        btn("rtTabAch", x + 28 + bw, y + 14, bw, 40, "成就", tab === "ach" ? "primary" : "ghost", () => {
+          f.rightTab = "ach";
+          saveState();
+        });
+        btn("rtTabSet", x + 42 + bw * 2, y + 14, bw, 40, "设置", tab === "settings" ? "primary" : "ghost", () => {
+          f.rightTab = "settings";
+          saveState();
+        });
+
+        hot("rightSwipe", x, y + 14, w, h - 14, () => {}, () => {});
+
+        const by = y + 64;
+        if (tab === "tasks") drawDrawerTasks(x, by, w, h - 72);
+        else if (tab === "ach") drawDrawerAch(x, by, w, h - 72);
+        else drawDrawerSettings(x, by, w, h - 72);
+      }
+
+      function drawDrawerInv(x, y, w, h) {
+        const a = state.shards;
+        const run = state.flow.run;
+        const res = (run && run.res) || { ink: 0, heat: 0, focus: 0 };
+        state.inv = state.inv || { items: [], equip: { weapon: null, charm: null, coat: null } };
+        state.inv.items = Array.isArray(state.inv.items) ? state.inv.items : [];
+        state.inv.equip = state.inv.equip || { weapon: null, charm: null, coat: null };
+        ctx.fillStyle = "rgba(255,255,255,0.86)";
+        ctx.font = `800 ${Math.round(13 * uiScale)}px ${fontSans}`;
+        ctx.fillText("资源", x + 14, y + 30);
+        ctx.fillStyle = "rgba(255,255,255,0.70)";
+        ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+        ctx.fillText(`红豆 ${a.hongdou} · 糖 ${a.sugar} · 蹄印 ${a.hoofprint}`, x + 14, y + 54);
+        ctx.fillText(`墨水 ${res.ink || 0} · 热度 ${res.heat || 0} · 专注 ${res.focus || 0}`, x + 14, y + 76);
+        ctx.fillStyle = "rgba(255,255,255,0.86)";
+        ctx.font = `800 ${Math.round(13 * uiScale)}px ${fontSans}`;
+        ctx.fillText("装备", x + 14, y + 114);
+        ctx.fillStyle = "rgba(255,255,255,0.62)";
+        ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+        const en = (uid) => {
+          const it = state.inv.items.find((x) => x.uid === uid);
+          return it ? `${it.name}（${it.rar}）` : "未装备";
+        };
+        ctx.fillText(`武器：${en(state.inv.equip.weapon)}`, x + 14, y + 138);
+        ctx.fillText(`外套：${en(state.inv.equip.coat)}`, x + 14, y + 160);
+        ctx.fillText(`护符：${en(state.inv.equip.charm)}`, x + 14, y + 182);
+
+        ctx.fillStyle = "rgba(255,255,255,0.86)";
+        ctx.font = `800 ${Math.round(13 * uiScale)}px ${fontSans}`;
+        ctx.fillText(`背包（${state.inv.items.length}）`, x + 14, y + 214);
+        let yy = y + 236;
+        for (let i = 0; i < Math.min(5, state.inv.items.length); i++) {
+          const it = state.inv.items[i];
+          rrPath(x + 14, yy, w - 28, 52, 14);
+          ctx.fillStyle = "rgba(255,255,255,0.06)";
+          ctx.fill();
+          ctx.strokeStyle = "rgba(255,255,255,0.10)";
+          ctx.stroke();
+          ctx.fillStyle = "rgba(255,255,255,0.92)";
+          ctx.font = `800 ${Math.round(13 * uiScale)}px ${fontSans}`;
+          ctx.fillText(it.name, x + 28, yy + 30);
+          ctx.fillStyle = "rgba(255,255,255,0.60)";
+          ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+          ctx.fillText(`${it.rar} · 力量 ${it.p}`, x + w - 28 - 120, yy + 30);
+          btn(`equip_${it.uid}`, x + w - 28 - 96, yy + 10, 84, 34, "装备", "ghost", () => {
+            if (it.slot === "weapon") state.inv.equip.weapon = it.uid;
+            else if (it.slot === "coat") state.inv.equip.coat = it.uid;
+            else if (it.slot === "charm") state.inv.equip.charm = it.uid;
+            else return toast("材料不可装备");
+            state.inv._v = (state.inv._v || 0) + 1;
+            track("item_equip", { id: it.id, slot: it.slot, rar: it.rar });
+            saveState();
+          });
+          yy += 62;
+        }
+
+        btn("openQuick", x + 14, y + h - 56, w - 28, 48, "打开快捷栏", "primary", () => openDrawer("quick"));
+      }
+      function drawDrawerTasks(x, y, w, h) {
+        const part = vn2DayPart();
+        const partZh = part === "morning" ? "清晨" : part === "afternoon" ? "下午" : "夜晚";
+        const hasEndingPrefix = (p) => Object.keys(state.endings || {}).some((k) => k.startsWith(p));
+        const hasEcho = (state.echoPool || []).length > 0;
+        const ml = (state.stats && state.stats.modeLast) || { A: { best: 0, calm: 0 }, B: { len: 0, sealed: 0 }, C: { hit: 0, drift: 0 } };
+        const ev = telemetrySummary().by || {};
+        const ec = (k) => ev[k] || 0;
+        const tasks = [
+          {
+            id: "night_echo",
+            title: "雨夜回声：写半价留言",
+            pre: 'flag("time_night")',
+            done: () => vn2Flag("task_night_echo"),
+            canClaim: () => part === "night" && hasEcho,
+            reward: () => {
+              state.shards.sugar += 1;
+              vn2SetMetaFlag("task_night_echo", 1);
+            },
+          },
+          {
+            id: "morning_pulse",
+            title: "清晨校准：在忙之前先呼吸",
+            pre: 'flag("task_night_echo") && flag("time_morning")',
+            done: () => vn2Flag("task_morning_pulse"),
+            canClaim: () => part === "morning" && (ml.A.best || 0) >= 4,
+            reward: () => {
+              state.shards.sugar += 1;
+              state.settings.mood = clamp((state.settings.mood || 0) + 6, 0, 100);
+              vn2SetMetaFlag("task_morning_pulse", 1);
+            },
+          },
+          {
+            id: "afternoon_boundary",
+            title: "下午边界：把“别内耗”说完整",
+            pre: 'flag("task_morning_pulse") && flag("time_afternoon")',
+            done: () => vn2Flag("task_afternoon_boundary"),
+            canClaim: () => part === "afternoon" && ec("vn_choice") >= 2,
+            reward: () => {
+              state.shards.sugar += 1;
+              vn2SetMetaFlag("task_afternoon_boundary", 1);
+            },
+          },
+          {
+            id: "send_letter",
+            title: "未寄出的信：寄出一次",
+            pre: 'flag("task_afternoon_boundary") && !flag("time_night")',
+            done: () => vn2Flag("task_send_letter"),
+            canClaim: () => part !== "night" && hasEndingPrefix("send_"),
+            reward: () => {
+              state.shards.hongdou += 1;
+              vn2SetMetaFlag("task_send_letter", 1);
+              vn2SetMetaFlag("task_unlock_side_time", 1);
+            },
+          },
+          {
+            id: "cutup_5",
+            title: "五字钉：把一句话钉在墙上",
+            pre: 'flag("task_send_letter")',
+            done: () => vn2Flag("task_cutup_5"),
+            canClaim: () => (ml.B.sealed || 0) === 1 && (ml.B.len || 0) > 0 && (ml.B.len || 0) <= 5,
+            reward: () => {
+              state.shards.hongdou += 1;
+              vn2SetMetaFlag("task_cutup_5", 1);
+            },
+          },
+          {
+            id: "pitstop",
+            title: "逆风公路：服务区补给",
+            pre: 'flag("task_cutup_5")',
+            done: () => vn2Flag("task_pitstop"),
+            canClaim: () => state.stats.fuel >= 5,
+            reward: () => {
+              state.shards.hoofprint += 1;
+              vn2SetMetaFlag("task_pitstop", 1);
+            },
+          },
+          {
+            id: "lane_nodmg",
+            title: "零擦伤：不要用撞击证明自己",
+            pre: 'flag("task_pitstop")',
+            done: () => vn2Flag("task_lane_nodmg"),
+            canClaim: () => (ml.C.hit || 0) === 0,
+            reward: () => {
+              state.shards.hoofprint += 1;
+              vn2SetMetaFlag("task_lane_nodmg", 1);
+            },
+          },
+          {
+            id: "p1_clear",
+            title: "镜面回廊：把路对齐一次",
+            pre: 'flag("task_lane_nodmg")',
+            done: () => vn2Flag("task_p1_clear"),
+            canClaim: () => !!(state.puzzle && state.puzzle.progress && state.puzzle.progress.p1 && state.puzzle.progress.p1.cleared),
+            reward: () => {
+              state.shards.sugar += 1;
+              vn2SetMetaFlag("task_p1_clear", 1);
+            },
+          },
+          {
+            id: "p2_clear",
+            title: "升降图腾：让自己上升一次",
+            pre: 'flag("task_p1_clear")',
+            done: () => vn2Flag("task_p2_clear"),
+            canClaim: () => !!(state.puzzle && state.puzzle.progress && state.puzzle.progress.p2 && state.puzzle.progress.p2.cleared),
+            reward: () => {
+              state.shards.hongdou += 1;
+              vn2SetMetaFlag("task_p2_clear", 1);
+            },
+          },
+          {
+            id: "p3_clear",
+            title: "颜色之门：别让标签决定你",
+            pre: 'flag("task_p2_clear")',
+            done: () => vn2Flag("task_p3_clear"),
+            canClaim: () => !!(state.puzzle && state.puzzle.progress && state.puzzle.progress.p3 && state.puzzle.progress.p3.cleared),
+            reward: () => {
+              state.shards.hoofprint += 1;
+              vn2SetMetaFlag("task_p3_clear", 1);
+              addTitle("不被标签");
+            },
+          },
+          {
+            id: "vn_qte",
+            title: "快一点：在0.8秒里抓回自己",
+            pre: 'flag("task_p1_clear")',
+            done: () => vn2Flag("task_vn_qte"),
+            canClaim: () => ec("vn_qte_ok") >= 2,
+            reward: () => {
+              state.shards.sugar += 1;
+              vn2SetMetaFlag("task_vn_qte", 1);
+            },
+          },
+          {
+            id: "night_side",
+            title: "夜晚限定：别把温柔当软弱",
+            pre: 'flag("task_send_letter") && flag("time_night")',
+            done: () => vn2Flag("task_night_side"),
+            canClaim: () => !!(state.vn2 && state.vn2.meta && state.vn2.meta.flags && state.vn2.meta.flags.side_time_done),
+            reward: () => {
+              state.shards.hongdou += 1;
+              vn2SetMetaFlag("task_night_side", 1);
+            },
+          },
+          {
+            id: "micro_horror",
+            title: "微恐：你开始相信那声敲击",
+            pre: 'flag("time_night") && flag("task_p1_clear")',
+            done: () => vn2Flag("task_micro_horror"),
+            canClaim: () => ec("puzzle_hint") >= 1 && ec("puzzle_clear") >= 1,
+            reward: () => {
+              state.shards.sugar += 1;
+              state.settings.mood = clamp((state.settings.mood || 0) + 4, 0, 100);
+              vn2SetMetaFlag("task_micro_horror", 1);
+            },
+          },
+          {
+            id: "combo_7",
+            title: "一周目：把自己完整玩一次",
+            pre: 'flag("task_p3_clear") && flag("task_vn_qte")',
+            done: () => vn2Flag("task_combo_7"),
+            canClaim: () => ec("mode_end") >= 5 && ec("puzzle_clear") >= 1 && ec("vn_choice") >= 6,
+            reward: () => {
+              state.shards.hongdou += 1;
+              state.shards.sugar += 1;
+              state.shards.hoofprint += 1;
+              vn2SetMetaFlag("task_combo_7", 1);
+              unlockAchievement("ach_king");
+            },
+          },
+          {
+            id: "backlook",
+            title: "回头看一眼：夜晚的自己会记住",
+            pre: 'flag("time_night") && philo>=3',
+            done: () => vn2Flag("task_backlook"),
+            canClaim: () => !!(state.vn2 && state.vn2.meta && state.vn2.meta.flags && Object.keys(state.vn2.meta.flags).some((k) => /act\\d+_back/.test(k))),
+            reward: () => {
+              state.shards.sugar += 2;
+              vn2SetMetaFlag("task_backlook", 1);
+              addTitle("敢回头");
+            },
+          },
+        ];
+        const scrollMax = 1100;
+        state.flow.taskScroll = clamp(state.flow.taskScroll || 0, 0, scrollMax);
+        ui.items.push({ type: "scroll", id: "taskScroll", r: { x, y, w, h } });
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x, y, w, h);
+        ctx.clip();
+        ctx.translate(0, -state.flow.taskScroll);
+
+        ctx.fillStyle = "rgba(255,255,255,0.86)";
+        ctx.font = `800 ${Math.round(13 * uiScale)}px ${fontSans}`;
+        ctx.fillText(`任务日志 · ${partZh}`, x + 14, y + 30);
+        ctx.fillStyle = "rgba(255,255,255,0.62)";
+        ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+        ctx.fillText("任务有前置与时间窗，完成后会连锁解锁下一条", x + 14, y + 54);
+
+        let yy = y + 70;
+        for (let i = 0; i < tasks.length; i++) {
+          const t = tasks[i];
+          const unlocked = vn2EvalCond(t.pre);
+          const done = t.done();
+          const canClaim = unlocked && !done && t.canClaim();
+          rrPath(x + 14, yy, w - 28, 78, 16);
+          ctx.fillStyle = unlocked ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.18)";
+          ctx.fill();
+          ctx.strokeStyle = unlocked ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.08)";
+          ctx.stroke();
+          ctx.fillStyle = unlocked ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.45)";
+          ctx.font = `800 ${Math.round(13 * uiScale)}px ${fontSans}`;
+          ctx.fillText(t.title, x + 28, yy + 30);
+          ctx.fillStyle = "rgba(255,255,255,0.62)";
+          ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+          ctx.fillText(done ? "已完成" : canClaim ? "可领取" : unlocked ? "进行中" : "未解锁", x + 28, yy + 54);
+          btn(
+            `taskBtn_${t.id}`,
+            x + w - 28 - 120,
+            yy + 18,
+            108,
+            42,
+            done ? "已完成" : canClaim ? "领取" : "详情",
+            done ? "ghost" : canClaim ? "primary" : "ghost",
+            () => {
+              if (!unlocked) return toast("需要完成前置任务");
+              if (done) return toast("已完成");
+              if (canClaim) {
+                t.reward();
+                audioSfx("stamp");
+                if (navigator.vibrate) navigator.vibrate(16);
+                saveState();
+                return;
+              }
+              toast("继续推进剧情/玩法以满足条件");
+            }
+          );
+          yy += 92;
+        }
+        ctx.restore();
+      }
+      function drawDrawerAch(x, y, w, h) {
+        const unlocked = (state.achievements && state.achievements.unlocked) || {};
+        const got = Object.keys(unlocked).length;
+        ctx.fillStyle = "rgba(255,255,255,0.86)";
+        ctx.font = `800 ${Math.round(13 * uiScale)}px ${fontSans}`;
+        ctx.fillText(`已解锁 ${got}/${ACHIEVEMENTS.length}`, x + 14, y + 30);
+        btn("achGo", x + 14, y + 46, w - 28, 48, "打开成就列表", "ghost", () => {
+          state.flow.scene = "achievements";
+          closeDrawer("right");
+          saveState();
+        });
+      }
+      function drawDrawerSettings(x, y, w, h) {
+        btn("setGo", x + 14, y + 18, w - 28, 48, "打开设置页", "primary", () => {
+          state.flow.scene = "settings";
+          closeDrawer("right");
+          saveState();
+        });
+        btn("setPerf", x + 14, y + 78, w - 28, 48, state.settings.perfMode ? "性能模式：开" : "性能模式：关", "ghost", () => {
+          state.settings.perfMode = !state.settings.perfMode;
+          resize();
+          saveState();
+        });
+        btn("setFps", x + 14, y + 138, w - 28, 48, state.settings.showFps ? "FPS显示：开" : "FPS显示：关", "ghost", () => {
+          state.settings.showFps = !state.settings.showFps;
+          saveState();
+        });
+      }
+      function drawDrawerQuick(x, y, w, h) {
+        const bw = (w - 28) / 2;
+        btn("quickHeal", x, y, bw, 56, "使用糖(治愈)", "primary", () => {
+          if (state.shards.sugar <= 0) return toast("糖不够");
+          state.shards.sugar -= 1;
+          state.settings.mood = clamp(state.settings.mood + 8, 0, 100);
+          audioSfx("stamp");
+          if (navigator.vibrate) navigator.vibrate(12);
+          saveState();
+        });
+        btn("quickFix", x + bw + 14, y, bw, 56, "抚平裂纹", "ghost", () => {
+          if (state.mirrorFracture <= 0) return toast("裂纹已很少");
+          state.mirrorFracture = clamp(state.mirrorFracture - 1, 0, 9);
+          audioSfx("ui");
+          if (navigator.vibrate) navigator.vibrate(8);
+          saveState();
+        });
       }
 
       function moodVector() {
@@ -1039,7 +1643,7 @@
       window.addEventListener("resize", resize);
       resize();
 
-      const ui = { items: [], down: false, downId: "", downAt: 0, mx: 0, my: 0, moved: false };
+      const ui = { items: [], down: false, downId: "", downAt: 0, mx: 0, my: 0, downX: 0, downY: 0, moved: false };
       function uiBegin() {
         ui.items.length = 0;
       }
@@ -1060,7 +1664,7 @@
         const r = { x, y, w, h };
         const hovered = hit(r);
         const pressed = ui.down && ui.downId === id;
-        const s = pressed ? 0.985 : hovered ? 1.01 : 1;
+        const s = pressed ? 0.95 : hovered ? 1.01 : 1;
         ctx.save();
         ctx.translate(x + w / 2, y + h / 2);
         ctx.scale(s, s);
@@ -1081,10 +1685,22 @@
         const tw = ctx.measureText(text).width;
         ctx.fillText(text, x + (w - tw) / 2, y + h * 0.64);
         ctx.restore();
-        ui.items.push({ type: "btn", id, r, onClick, onHold });
+        const silent = !text;
+        const feedback = silent ? "" : style === "danger" ? "important" : style === "primary" ? "stamp" : style === "ghost" ? "click" : "ui";
+        const hapticKind = silent ? "" : style === "danger" ? "heavy" : style === "primary" ? "mid" : "light";
+        ui.items.push({ type: "btn", id, r, onClick, onHold, feedback, haptic: hapticKind });
       }
       function hot(id, x, y, w, h, onClick, onHold) {
         ui.items.push({ type: "btn", id, r: { x, y, w, h }, onClick, onHold });
+      }
+      function hot2(id, x, y, w, h, feedback, haptic, onClick, onHold) {
+        ui.items.push({ type: "btn", id, r: { x, y, w, h }, onClick, onHold, feedback: feedback || "", haptic: haptic || "" });
+      }
+      function haptic(kind) {
+        if (!navigator.vibrate) return;
+        if (kind === "light") navigator.vibrate(8);
+        else if (kind === "mid") navigator.vibrate(14);
+        else if (kind === "heavy") navigator.vibrate(22);
       }
       function chip(x, y, text, fg, bg, stroke) {
         ctx.font = `12px ${fontSans}`;
@@ -1204,7 +1820,12 @@
         if (cur.ui) return;
         const seed = hash32((cur.moduleId || "A") + "|" + String(now()) + "|" + String(Math.random()));
         const r = mulberry32(seed);
-        const base = cur.moduleId === "A" ? ["呼吸", "加班", "焦虑", "睡不着", "好想哭", "不想卷", "想躺平", "想被抱"] : cur.moduleId === "B" ? ["对不起", "谢谢你", "我想你", "算了吧", "别走", "我懂了", "原谅", "再见"] : ["开摆", "冲", "重启", "跑路", "掀桌", "发疯", "撤回", "加速"];
+        const base =
+          cur.moduleId === "A"
+            ? ["呼吸", "加班", "焦虑", "睡不着", "情绪电量", "边界感", "松弛感", "不想卷", "想躺平", "想被抱", "别内耗", "我还行"]
+            : cur.moduleId === "B"
+              ? ["对不起", "谢谢你", "我想你", "算了吧", "别走", "我懂了", "原谅", "再见", "撤回", "已读", "未读", "不打扰"]
+              : ["开摆", "冲", "重启", "跑路", "掀桌", "发疯", "撤回", "加速", "换道", "漂移", "别回头", "继续走"];
         const extra = (getWeekTheme(now()).tags || []).slice(0, 4);
         const pool = base.concat(extra);
         const chips = [];
@@ -1276,6 +1897,55 @@
         state.flow.toast = String(msg || "");
         state.flow.toastAt = now();
         saveState();
+      }
+
+      function ensureTelemetry() {
+        state.telemetry = state.telemetry || { installId: seedFrom([navigator.userAgent || "ua", String(now()), String(Math.random())]), sessions: [], events: [], ab: { group: "", assignedAt: 0 } };
+        state.telemetry.sessions = Array.isArray(state.telemetry.sessions) ? state.telemetry.sessions : [];
+        state.telemetry.events = Array.isArray(state.telemetry.events) ? state.telemetry.events : [];
+        state.telemetry.ab = state.telemetry.ab || { group: "", assignedAt: 0 };
+        if (typeof state.telemetry._v !== "number") state.telemetry._v = 0;
+        state.telemetry._cache = state.telemetry._cache && typeof state.telemetry._cache === "object" ? state.telemetry._cache : { v: -1, sum: null };
+        if (!state.telemetry.ab.group) {
+          const h = hash32(String(state.telemetry.installId));
+          state.telemetry.ab.group = h % 2 === 0 ? "A" : "B";
+          state.telemetry.ab.assignedAt = now();
+        }
+      }
+      function track(name, props) {
+        ensureTelemetry();
+        const e = { t: now(), name: String(name || ""), scene: state.flow.scene || "", props: props || {} };
+        state.telemetry.events.push(e);
+        if (state.telemetry.events.length > 800) state.telemetry.events.splice(0, state.telemetry.events.length - 800);
+        state.telemetry._v += 1;
+      }
+      function startSession() {
+        ensureTelemetry();
+        const dk = dayKey(now());
+        const ss = state.telemetry.sessions;
+        const last = ss.length ? ss[ss.length - 1] : null;
+        if (!last || last.dayKey !== dk) {
+          ss.push({ at: now(), dayKey: dk });
+          if (ss.length > 60) ss.splice(0, ss.length - 60);
+          state.telemetry._v += 1;
+        }
+        track("session_start", { dayKey: dk, ab: state.telemetry.ab.group });
+      }
+      function telemetrySummary() {
+        ensureTelemetry();
+        const tv = state.telemetry._v || 0;
+        const c = state.telemetry._cache;
+        if (c && c.v === tv && c.sum) return c.sum;
+        const ev = state.telemetry.events;
+        const ss = state.telemetry.sessions;
+        const by = {};
+        for (let i = 0; i < ev.length; i++) by[ev[i].name] = (by[ev[i].name] || 0) + 1;
+        const uniqueDays = {};
+        for (let i = 0; i < ss.length; i++) uniqueDays[ss[i].dayKey] = 1;
+        const days = Object.keys(uniqueDays).length;
+        const sum = { events: ev.length, sessions: ss.length, activeDays: days, by };
+        state.telemetry._cache = { v: tv, sum };
+        return sum;
       }
 
       function openKeyboard(initial, maxLen) {
@@ -1410,6 +2080,7 @@
           C: { root: 57, prog: [0, 7, 10, 5], lead: [0, 3, 5, 7, 10, 7, 5, 3] },
           final: { root: 59, prog: [0, 5, 7, 12], lead: [0, 2, 4, 7, 12, 7, 4, 2] },
           vote: { root: 61, prog: [0, 7, 3, 10], lead: [0, 3, 7, 10, 7, 3, 0, 3] },
+          horror: { root: 54, prog: [0, 3, 10, 5], lead: [0, 1, 3, 6, 3, 1, 0, -1] },
         };
         const s = seq[key] || seq.hub;
         const st = {
@@ -1589,6 +2260,44 @@
           rampParam(g.gain, 0.0001, t + 0.05, 0.04);
           n.start(t);
           n.stop(t + 0.08);
+          return;
+        }
+
+        if (type === "back") {
+          const o = a.ac.createOscillator();
+          const g = a.ac.createGain();
+          const lp = a.ac.createBiquadFilter();
+          lp.type = "lowpass";
+          lp.frequency.value = 900;
+          o.type = "sine";
+          o.frequency.setValueAtTime(260, t);
+          o.frequency.exponentialRampToValueAtTime(180, t + 0.09);
+          g.gain.value = 0;
+          o.connect(lp);
+          lp.connect(g);
+          g.connect(outBus);
+          rampParam(g.gain, 0.10, t, 0.006);
+          rampParam(g.gain, 0.0001, t + 0.14, 0.12);
+          o.start(t);
+          o.stop(t + 0.18);
+          return;
+        }
+
+        if (type === "important" || type === "whisper") {
+          const n = mkNoise(a.ac, 0.22);
+          const bp = a.ac.createBiquadFilter();
+          bp.type = "bandpass";
+          bp.frequency.value = type === "whisper" ? 520 : 860;
+          bp.Q.value = type === "whisper" ? 6 : 9;
+          const g = a.ac.createGain();
+          g.gain.value = 0;
+          n.connect(bp);
+          bp.connect(g);
+          g.connect(outBus);
+          rampParam(g.gain, type === "whisper" ? 0.07 : 0.12, t, 0.01);
+          rampParam(g.gain, 0.0001, t + 0.20, 0.14);
+          n.start(t);
+          n.stop(t + 0.26);
           return;
         }
 
@@ -1908,6 +2617,7 @@
           id,
           phase: "intro",
           introAt: now(),
+          introOnce: 0,
           firstTap: 0,
           showPanel: false,
           rot: 0,
@@ -1923,7 +2633,392 @@
         };
         state.flow.scene = "puzzle";
         saveState();
-        audioBgm("final");
+        audioBgm("horror");
+        track("puzzle_start", { id });
+      }
+
+      const MAP_DEFS = [
+        { id: "map_corridor", name: "镜面走廊", tags: ["微恐", "压迫"], baseBg: "corridor", hiddenCond: 'flag("time_night") && philo>=3' },
+        { id: "map_bar", name: "地下酒吧", tags: ["治愈", "回流"], baseBg: "bar", hiddenCond: 'flag("task_night_echo")' },
+        { id: "map_letter", name: "信封堆", tags: ["叙事", "剪贴"], baseBg: "letter", hiddenCond: 'flag("task_send_letter")' },
+        { id: "map_road", name: "逆风公路", tags: ["挑战", "爽感"], baseBg: "road", hiddenCond: 'flag("task_pitstop")' },
+        { id: "map_council", name: "镜面议会", tags: ["终局", "审判"], baseBg: "mirror_council", hiddenCond: 'philo>=6' },
+      ];
+
+      const ELEMENTS = [
+        { id: "fire", name: "火", c: "rgba(255,77,109,0.85)" },
+        { id: "water", name: "水", c: "rgba(34,211,238,0.85)" },
+        { id: "ice", name: "冰", c: "rgba(200,240,255,0.85)" },
+        { id: "electro", name: "电", c: "rgba(139,92,246,0.90)" },
+        { id: "wind", name: "风", c: "rgba(34,211,153,0.85)" },
+        { id: "earth", name: "土", c: "rgba(250,204,21,0.85)" },
+        { id: "metal", name: "金", c: "rgba(255,255,255,0.85)" },
+        { id: "wood", name: "木", c: "rgba(132,204,22,0.85)" },
+        { id: "light", name: "光", c: "rgba(255,214,170,0.92)" },
+        { id: "dark", name: "暗", c: "rgba(120,92,255,0.70)" },
+      ];
+
+      const REACTIONS = {
+        "fire+water": { id: "steam", name: "蒸汽", dmg: 1.35, fx: "flash" },
+        "water+fire": { id: "steam", name: "蒸汽", dmg: 1.35, fx: "flash" },
+        "fire+ice": { id: "melt", name: "融化", dmg: 1.55, fx: "shake" },
+        "ice+fire": { id: "melt", name: "融化", dmg: 1.55, fx: "shake" },
+        "electro+water": { id: "shock", name: "感电", dmg: 1.25, dot: 3, fx: "flash" },
+        "water+electro": { id: "shock", name: "感电", dmg: 1.25, dot: 3, fx: "flash" },
+        "electro+ice": { id: "super", name: "超导", dmg: 1.25, debuff: "brittle", fx: "shake" },
+        "ice+electro": { id: "super", name: "超导", dmg: 1.25, debuff: "brittle", fx: "shake" },
+        "fire+electro": { id: "over", name: "过载", dmg: 1.45, fx: "shake" },
+        "electro+fire": { id: "over", name: "过载", dmg: 1.45, fx: "shake" },
+        "wind+fire": { id: "swirl", name: "扩散", dmg: 1.18, spread: 1, fx: "flash" },
+        "wind+water": { id: "swirl", name: "扩散", dmg: 1.18, spread: 1, fx: "flash" },
+        "wind+ice": { id: "swirl", name: "扩散", dmg: 1.18, spread: 1, fx: "flash" },
+        "wind+electro": { id: "swirl", name: "扩散", dmg: 1.18, spread: 1, fx: "flash" },
+        "earth+water": { id: "mud", name: "泥泞", dmg: 1.15, slow: 1, fx: "ui" },
+        "water+earth": { id: "mud", name: "泥泞", dmg: 1.15, slow: 1, fx: "ui" },
+        "earth+fire": { id: "ash", name: "灰烬", dmg: 1.20, fx: "ui" },
+        "fire+earth": { id: "ash", name: "灰烬", dmg: 1.20, fx: "ui" },
+        "metal+electro": { id: "arc", name: "电弧", dmg: 1.30, fx: "flash" },
+        "electro+metal": { id: "arc", name: "电弧", dmg: 1.30, fx: "flash" },
+        "wood+fire": { id: "burn", name: "灼烧", dmg: 1.20, dot: 4, fx: "ui" },
+        "fire+wood": { id: "burn", name: "灼烧", dmg: 1.20, dot: 4, fx: "ui" },
+        "wood+water": { id: "growth", name: "生长", dmg: 1.10, heal: 2, fx: "ui" },
+        "water+wood": { id: "growth", name: "生长", dmg: 1.10, heal: 2, fx: "ui" },
+        "dark+light": { id: "eclipse", name: "蚀", dmg: 1.60, fx: "important" },
+        "light+dark": { id: "eclipse", name: "蚀", dmg: 1.60, fx: "important" },
+        "dark+ice": { id: "silence", name: "静默", dmg: 1.20, fx: "whisper" },
+        "ice+dark": { id: "silence", name: "静默", dmg: 1.20, fx: "whisper" },
+        "light+fire": { id: "flare", name: "炽白", dmg: 1.35, fx: "flash" },
+        "fire+light": { id: "flare", name: "炽白", dmg: 1.35, fx: "flash" },
+      };
+
+      const ITEM_DEFS = [
+        { id: "w1", name: "退格短刃", slot: "weapon", base: 6, tags: ["暴击", "连击"] },
+        { id: "w2", name: "夜班纸刀", slot: "weapon", base: 5, tags: ["微恐", "暗"] },
+        { id: "w3", name: "回声酒勺", slot: "weapon", base: 5, tags: ["治愈", "水"] },
+        { id: "w4", name: "裂纹手电", slot: "weapon", base: 4, tags: ["光", "探索"] },
+        { id: "w5", name: "不解释锤", slot: "weapon", base: 7, tags: ["土", "护盾"] },
+        { id: "c1", name: "薄雾外套", slot: "coat", base: 4, tags: ["减伤", "夜晚"] },
+        { id: "c2", name: "松弛衫", slot: "coat", base: 3, tags: ["回血", "清晨"] },
+        { id: "c3", name: "社恐斗篷", slot: "coat", base: 4, tags: ["暗", "闪避"] },
+        { id: "c4", name: "临界雨衣", slot: "coat", base: 4, tags: ["水", "抗性"] },
+        { id: "c5", name: "过载夹克", slot: "coat", base: 5, tags: ["电", "反伤"] },
+        { id: "t1", name: "已读不回徽章", slot: "charm", base: 3, tags: ["连击", "边界"] },
+        { id: "t2", name: "撤回护符", slot: "charm", base: 3, tags: ["容错", "重置"] },
+        { id: "t3", name: "情绪电量计", slot: "charm", base: 2, tags: ["回血", "自调"] },
+        { id: "t4", name: "不内耗戒指", slot: "charm", base: 3, tags: ["减伤", "专注"] },
+        { id: "t5", name: "走廊钥匙扣", slot: "charm", base: 4, tags: ["探索", "彩蛋"] },
+        { id: "x1", name: "糖纸", slot: "mat", base: 0, tags: ["合成"] },
+        { id: "x2", name: "红豆票", slot: "mat", base: 0, tags: ["合成"] },
+        { id: "x3", name: "蹄印贴", slot: "mat", base: 0, tags: ["合成"] },
+        { id: "x4", name: "封蜡", slot: "mat", base: 0, tags: ["合成"] },
+        { id: "x5", name: "碎镜片", slot: "mat", base: 0, tags: ["合成", "微恐"] },
+      ];
+
+      function rarityByRoll(r) {
+        const x = r();
+        if (x < 0.02) return "platinum";
+        if (x < 0.10) return "gold";
+        if (x < 0.32) return "silver";
+        return "bronze";
+      }
+      function affixPool(slot) {
+        const common = [
+          { id: "hp", name: "耐受", min: 2, max: 10 },
+          { id: "combo", name: "连击窗", min: 1, max: 6 },
+          { id: "dmg", name: "伤害", min: 1, max: 8 },
+        ];
+        const special = slot === "weapon" ? [{ id: "crit", name: "暴击", min: 1, max: 12 }] : slot === "coat" ? [{ id: "dr", name: "减伤", min: 1, max: 10 }] : [{ id: "heal", name: "自愈", min: 1, max: 8 }];
+        return common.concat(special);
+      }
+      function rollItem(seed) {
+        const r = mulberry32(hash32(String(seed)));
+        const base = ITEM_DEFS[(r() * ITEM_DEFS.length) | 0];
+        const rar = rarityByRoll(r);
+        const nAff = rar === "platinum" ? 3 : rar === "gold" ? 2 : rar === "silver" ? 2 : 1;
+        const pool = affixPool(base.slot);
+        const aff = [];
+        const used = {};
+        for (let i = 0; i < nAff; i++) {
+          const a = pool[(r() * pool.length) | 0];
+          if (used[a.id]) continue;
+          used[a.id] = 1;
+          const v = a.min + ((r() * (a.max - a.min + 1)) | 0);
+          aff.push({ id: a.id, name: a.name, v });
+        }
+        const p = base.base + (rar === "platinum" ? 6 : rar === "gold" ? 4 : rar === "silver" ? 2 : 0);
+        return { uid: genId("it"), id: base.id, name: base.name, slot: base.slot, rar, p, aff, ts: now() };
+      }
+      function invAddItem(it) {
+        state.inv = state.inv || { items: [], equip: { weapon: null, charm: null, coat: null } };
+        state.inv.items = Array.isArray(state.inv.items) ? state.inv.items : [];
+        state.inv.items.unshift(it);
+        if (state.inv.items.length > 120) state.inv.items.length = 120;
+        state.inv._v = (state.inv._v || 0) + 1;
+        track("item_gain", { id: it.id, rar: it.rar, slot: it.slot });
+        saveState();
+      }
+      function invGetItem(uid) {
+        if (!uid) return null;
+        const inv = state.inv;
+        const items = inv && Array.isArray(inv.items) ? inv.items : [];
+        const v = inv && typeof inv._v === "number" ? inv._v : 0;
+        if (inv) {
+          if (!inv._idx || inv._idxV !== v) {
+            const idx = {};
+            for (let i = 0; i < items.length; i++) idx[items[i].uid] = items[i];
+            inv._idx = idx;
+            inv._idxV = v;
+          }
+          return inv._idx[uid] || null;
+        }
+        for (let i = 0; i < items.length; i++) if (items[i].uid === uid) return items[i];
+        return null;
+      }
+      function equipStats() {
+        state.inv = state.inv || { items: [], equip: { weapon: null, charm: null, coat: null } };
+        const inv = state.inv;
+        inv._v = inv._v || 0;
+        inv._cache = inv._cache && typeof inv._cache === "object" ? inv._cache : { k: "", v: -1, out: null };
+        const eq = inv.equip || {};
+        const cacheKey = `${eq.weapon || ""}|${eq.coat || ""}|${eq.charm || ""}`;
+        if (inv._cache.v === inv._v && inv._cache.k === cacheKey && inv._cache.out) return inv._cache.out;
+        const uids = [eq.weapon, eq.coat, eq.charm];
+        const out = { hp: 0, dmg: 0, comboWin: 0, drFlat: 0 };
+        for (let i = 0; i < uids.length; i++) {
+          const it = invGetItem(uids[i]);
+          if (!it) continue;
+          if (it.slot === "coat") out.hp += Math.round(it.p * 1.2);
+          if (it.slot === "weapon") out.dmg += it.p * 0.015;
+          if (it.slot === "charm") out.comboWin += 0.03 * (it.p || 0);
+          const aff = Array.isArray(it.aff) ? it.aff : [];
+          for (let j = 0; j < aff.length; j++) {
+            const a = aff[j];
+            if (a.id === "hp") out.hp += a.v;
+            else if (a.id === "dmg") out.dmg += a.v * 0.01;
+            else if (a.id === "combo") out.comboWin += a.v * 0.02;
+            else if (a.id === "dr") out.drFlat += Math.round(a.v / 4);
+          }
+        }
+        inv._cache = { k: cacheKey, v: inv._v, out };
+        return out;
+      }
+
+      const SKILL_DEFS = [
+        { id: "mind_1", tree: "mind", name: "不内耗", desc: "连击窗口 +0.15s", cost: 1, req: [], eff: { comboWin: 0.15 } },
+        { id: "mind_2", tree: "mind", name: "情绪电量", desc: "最大生命 +6", cost: 1, req: ["mind_1"], eff: { hp: 6 } },
+        { id: "mind_3", tree: "mind", name: "松弛感", desc: "受到伤害 -1（最低1）", cost: 1, req: ["mind_2"], eff: { drFlat: 1 } },
+        { id: "mind_4", tree: "mind", name: "容错调参", desc: "A模式容错上限 +2%", cost: 1, req: ["mind_1"], eff: { aTol: 0.02 } },
+        { id: "mind_5", tree: "mind", name: "夜晚自救", desc: "夜晚战斗伤害 +6%", cost: 1, req: ["mind_3"], eff: { nightDmg: 0.06 } },
+        { id: "mind_6", tree: "mind", name: "回声屏障", desc: "开场护盾 +6", cost: 1, req: ["mind_2"], eff: { shieldStart: 6 } },
+        { id: "mind_7", tree: "mind", name: "拒绝算法", desc: "QTE失败惩罚减轻", cost: 1, req: ["mind_5"], eff: { qteSoft: 1 } },
+        { id: "mind_8", tree: "mind", name: "呼吸成瘾", desc: "A模式奖励 +1 糖（每日一次）", cost: 1, req: ["mind_4"], eff: { aDaily: 1 } },
+        { id: "mind_9", tree: "mind", name: "重启", desc: "失败后获得 +1 专注", cost: 1, req: ["mind_6"], eff: { failFocus: 1 } },
+        { id: "mind_10", tree: "mind", name: "不回头", desc: "元素反应伤害 +6%", cost: 1, req: ["mind_5"], eff: { rxDmg: 0.06 } },
+        { id: "mind_11", tree: "mind", name: "稳态", desc: "连击倍率上限 +0.2", cost: 1, req: ["mind_1"], eff: { comboCap: 0.2 } },
+        { id: "mind_12", tree: "mind", name: "冷静", desc: "受到暴击概率 -（模拟）", cost: 1, req: ["mind_3"], eff: { _x: 1 } },
+        { id: "mind_13", tree: "mind", name: "允许", desc: "治疗效果 +20%", cost: 1, req: ["mind_2"], eff: { healMult: 0.2 } },
+        { id: "mind_14", tree: "mind", name: "清醒", desc: "每日挑战额外掉落概率 +4%", cost: 1, req: ["mind_10"], eff: { drop: 0.04 } },
+        { id: "mind_15", tree: "mind", name: "你不是工具", desc: "总伤害 +5%", cost: 1, req: ["mind_14"], eff: { dmg: 0.05 } },
+
+        { id: "bond_1", tree: "bond", name: "把话说完", desc: "B模式词片 +2（更好拼）", cost: 1, req: [], eff: { bWords: 2 } },
+        { id: "bond_2", tree: "bond", name: "不打扰", desc: "B模式封蜡门槛 -1", cost: 1, req: ["bond_1"], eff: { bNeed: -1 } },
+        { id: "bond_3", tree: "bond", name: "已读不回", desc: "暗元素伤害 +6%", cost: 1, req: ["bond_1"], eff: { darkDmg: 0.06 } },
+        { id: "bond_4", tree: "bond", name: "撤回勇气", desc: "撤回不清零连击（一次）", cost: 1, req: ["bond_2"], eff: { undoShield: 1 } },
+        { id: "bond_5", tree: "bond", name: "谢谢你", desc: "奖励红豆 +1（每日一次）", cost: 1, req: ["bond_2"], eff: { bDaily: 1 } },
+        { id: "bond_6", tree: "bond", name: "边界感", desc: "受到伤害 -1（最低1）", cost: 1, req: ["bond_1"], eff: { drFlat: 1 } },
+        { id: "bond_7", tree: "bond", name: "被看见", desc: "光元素伤害 +6%", cost: 1, req: ["bond_3"], eff: { lightDmg: 0.06 } },
+        { id: "bond_8", tree: "bond", name: "别走", desc: "开场生命 +4", cost: 1, req: ["bond_6"], eff: { hp: 4 } },
+        { id: "bond_9", tree: "bond", name: "道歉练习", desc: "反应：蒸汽伤害 +8%", cost: 1, req: ["bond_5"], eff: { rxSteam: 0.08 } },
+        { id: "bond_10", tree: "bond", name: "真诚", desc: "任务奖励 +10%", cost: 1, req: ["bond_8"], eff: { taskBonus: 0.1 } },
+        { id: "bond_11", tree: "bond", name: "共鸣", desc: "解谜提示次数不计入惩罚（离线）", cost: 1, req: ["bond_10"], eff: { hintSoft: 1 } },
+        { id: "bond_12", tree: "bond", name: "封蜡加印", desc: "墨水上限 +1", cost: 1, req: ["bond_5"], eff: { inkCap: 1 } },
+        { id: "bond_13", tree: "bond", name: "温柔不等于软弱", desc: "治疗 +1", cost: 1, req: ["bond_10"], eff: { healFlat: 1 } },
+        { id: "bond_14", tree: "bond", name: "回信", desc: "剧情奖励 +1 红豆（模拟）", cost: 1, req: ["bond_12"], eff: { _x: 1 } },
+        { id: "bond_15", tree: "bond", name: "不被标签", desc: "全元素伤害 +3%", cost: 1, req: ["bond_13"], eff: { elemDmg: 0.03 } },
+
+        { id: "motion_1", tree: "motion", name: "换道", desc: "C模式速度 -5%（更易）", cost: 1, req: [], eff: { cSpeed: -0.05 } },
+        { id: "motion_2", tree: "motion", name: "漂移", desc: "漂移无敌 +0.2s", cost: 1, req: ["motion_1"], eff: { drift: 0.2 } },
+        { id: "motion_3", tree: "motion", name: "刹车", desc: "刹车效果更强", cost: 1, req: ["motion_1"], eff: { brake: 1 } },
+        { id: "motion_4", tree: "motion", name: "逆风王", desc: "战斗开场连击 +1", cost: 1, req: ["motion_2"], eff: { comboStart: 1 } },
+        { id: "motion_5", tree: "motion", name: "燃料", desc: "挑战奖励分数 +5%", cost: 1, req: ["motion_4"], eff: { score: 0.05 } },
+        { id: "motion_6", tree: "motion", name: "专注", desc: "专注上限 +1", cost: 1, req: ["motion_2"], eff: { focusCap: 1 } },
+        { id: "motion_7", tree: "motion", name: "硬撑", desc: "生命 +6", cost: 1, req: ["motion_1"], eff: { hp: 6 } },
+        { id: "motion_8", tree: "motion", name: "重力", desc: "土元素护盾 +4", cost: 1, req: ["motion_7"], eff: { shieldPlus: 4 } },
+        { id: "motion_9", tree: "motion", name: "潮湿", desc: "雨天水/电更强 +4%", cost: 1, req: ["motion_5"], eff: { rain: 0.04 } },
+        { id: "motion_10", tree: "motion", name: "风切", desc: "扩散反应伤害 +8%", cost: 1, req: ["motion_5"], eff: { rxSwirl: 0.08 } },
+        { id: "motion_11", tree: "motion", name: "硬核", desc: "连击倍率上限 +0.2", cost: 1, req: ["motion_4"], eff: { comboCap: 0.2 } },
+        { id: "motion_12", tree: "motion", name: "不解释", desc: "重要音效触发时额外分数", cost: 1, req: ["motion_11"], eff: { scoreHit: 20 } },
+        { id: "motion_13", tree: "motion", name: "续航", desc: "每日挑战开场护盾 +6", cost: 1, req: ["motion_7"], eff: { shieldStart: 6 } },
+        { id: "motion_14", tree: "motion", name: "热身", desc: "第一击伤害 +15%", cost: 1, req: ["motion_13"], eff: { first: 0.15 } },
+        { id: "motion_15", tree: "motion", name: "走下去", desc: "总伤害 +5%", cost: 1, req: ["motion_14"], eff: { dmg: 0.05 } },
+      ];
+
+      function ensureSkills() {
+        state.skills = state.skills || { points: 0, spent: {}, trees: { mind: {}, bond: {}, motion: {} } };
+        state.skills.spent = state.skills.spent || {};
+        if (typeof state.skills.points !== "number") state.skills.points = 0;
+        if (typeof state.skills._v !== "number") state.skills._v = 0;
+        state.skills._cache = state.skills._cache && typeof state.skills._cache === "object" ? state.skills._cache : { v: -1, totals: {} };
+      }
+      function skillHas(id) {
+        ensureSkills();
+        return !!state.skills.spent[id];
+      }
+      function canUnlockSkill(id) {
+        ensureSkills();
+        const s = SKILL_DEFS.find((x) => x.id === id);
+        if (!s) return false;
+        if (skillHas(id)) return false;
+        if ((state.skills.points || 0) < (s.cost || 1)) return false;
+        const req = s.req || [];
+        for (let i = 0; i < req.length; i++) if (!skillHas(req[i])) return false;
+        return true;
+      }
+      function unlockSkill(id) {
+        ensureSkills();
+        const s = SKILL_DEFS.find((x) => x.id === id);
+        if (!s) return;
+        if (!canUnlockSkill(id)) return toast("条件不足");
+        state.skills.points -= s.cost || 1;
+        state.skills.spent[id] = 1;
+        state.skills._v += 1;
+        track("skill_unlock", { id });
+        saveState();
+      }
+      function resetSkills() {
+        ensureSkills();
+        const cost = 2;
+        if (state.shards.hongdou < cost) return toast("需要红豆×2");
+        state.shards.hongdou -= cost;
+        state.skills.spent = {};
+        state.skills._v += 1;
+        toast("已重置");
+        track("skill_reset", { cost });
+        saveState();
+      }
+      function skillStat(key) {
+        ensureSkills();
+        const sv = state.skills._v || 0;
+        const c = state.skills._cache;
+        if (c && c.v !== sv) c.totals = {};
+        if (c && c.v === sv && typeof c.totals[key] === "number") return c.totals[key];
+        const totals = {};
+        for (let i = 0; i < SKILL_DEFS.length; i++) {
+          const s = SKILL_DEFS[i];
+          if (!state.skills.spent[s.id]) continue;
+          const eff = s.eff || {};
+          for (const k in eff) {
+            const v = eff[k];
+            if (typeof v === "number") totals[k] = (totals[k] || 0) + v;
+          }
+        }
+        state.skills._cache = { v: sv, totals };
+        return typeof totals[key] === "number" ? totals[key] : 0;
+      }
+
+      function mapById(id) {
+        for (let i = 0; i < MAP_DEFS.length; i++) if (MAP_DEFS[i].id === id) return MAP_DEFS[i];
+        return MAP_DEFS[0];
+      }
+      function weatherKey(seed) {
+        const list = ["clear", "rain", "fog", "windy", "storm"];
+        return list[hash32(String(seed)) % list.length];
+      }
+
+      function ensureChallenge() {
+        state.challenge = state.challenge || { daily: {}, weekly: {}, best: { daily: 0, weekly: 0 }, board: { daily: [], weekly: [] } };
+        state.challenge.best = state.challenge.best || { daily: 0, weekly: 0 };
+        state.challenge.board = state.challenge.board || { daily: [], weekly: [] };
+      }
+      function challengeKey(kind) {
+        if (kind === "weekly") {
+          const d = new Date();
+          const onejan = new Date(d.getFullYear(), 0, 1);
+          const week = Math.floor(((d - onejan) / 86400000 + onejan.getDay() + 6) / 7);
+          return `w${d.getFullYear()}_${week}`;
+        }
+        return dayKey(now());
+      }
+      function ensureBoard(kind) {
+        ensureChallenge();
+        const k = challengeKey(kind);
+        const bd = state.challenge.board[kind] || [];
+        if (bd.length) return;
+        const seed = hash32(kind + "|" + k);
+        const r = mulberry32(seed);
+        const list = [];
+        for (let i = 0; i < 20; i++) {
+          const name = pick(["小马达", "撤回键", "夜班人", "边界党", "淡人", "疯批", "明天再说", "不内耗"]);
+          const score = 800 + ((r() * 2200) | 0);
+          list.push({ name, score, ts: now() - ((r() * 6) | 0) * DAY_MS });
+        }
+        state.challenge.board[kind] = list.sort((a, b) => b.score - a.score);
+        saveState();
+      }
+      function boardInsert(kind, name, score) {
+        ensureChallenge();
+        ensureBoard(kind);
+        const bd = state.challenge.board[kind] || [];
+        bd.push({ name: String(name || "你"), score: Math.round(score || 0), ts: now() });
+        bd.sort((a, b) => b.score - a.score);
+        if (bd.length > 20) bd.length = 20;
+        state.challenge.board[kind] = bd;
+        saveState();
+      }
+      function openChallengeHome() {
+        ensureChallenge();
+        ensureBoard("daily");
+        ensureBoard("weekly");
+        state.flow.scene = "challengeHome";
+        saveState();
+      }
+      function startChallenge(kind) {
+        ensureChallenge();
+        const k = challengeKey(kind);
+        const seed = hash32(kind + "|" + k + "|" + String(state.mirrorFracture));
+        const r = mulberry32(seed);
+        const map = MAP_DEFS[(r() * MAP_DEFS.length) | 0];
+        const wx = weatherKey(seed);
+        const part = vn2DayPart();
+        state.flow.challenge = { kind, key: k, seed, mapId: map.id, weather: wx, part, step: 0, score: 0, startedAt: now(), endedAt: 0, hiddenTaken: 0, log: [] };
+        saveState();
+        startBattleFromChallenge();
+      }
+
+      function startBattleFromChallenge() {
+        const ch = state.flow.challenge;
+        if (!ch) return;
+        ensureSkills();
+        const map = mapById(ch.mapId);
+        const enemySeed = hash32(String(ch.seed) + "|e|" + String(ch.step));
+        const r = mulberry32(enemySeed);
+        const hp = 100 + ((r() * 60) | 0) + state.mirrorFracture * 6;
+        const atk = 7 + ((r() * 5) | 0) + (ch.kind === "weekly" ? 2 : 0);
+        const name = pick(["空壳", "回声", "后座乘客", "未读气泡", "电量焦虑", "走廊的影子"]);
+        const mapFx = { weather: ch.weather, part: ch.part };
+        const es = equipStats();
+        state.flow.battle = {
+          kind: "challenge",
+          mapId: map.id,
+          mapFx,
+          enemy: { name, hp, hpMax: hp, atk },
+          player: {
+            hp: 60 + state.shards.sugar * 2 + skillStat("hp") + (es.hp || 0),
+            hpMax: 60 + state.shards.sugar * 2 + skillStat("hp") + (es.hp || 0),
+            shield: skillStat("shieldStart"),
+          },
+          combo: { n: 0, mult: 1, t0: now(), lastAt: 0 },
+          status: {},
+          lastElem: "",
+          log: [],
+          startedAt: now(),
+          endedAt: 0,
+          elemPick: "fire",
+        };
+        state.flow.scene = "battle";
+        track("battle_start", { kind: ch.kind, mapId: map.id, weather: ch.weather });
+        saveState();
+        audioBgm("horror");
       }
 
       function gotoHub() {
@@ -1951,8 +3046,23 @@
       function openTurn(moduleId) {
         const run = state.flow.run;
         run.turnStartAt = now();
-        run.current = { moduleId, phase: "input", input: "", sugar: "三分糖", leaveText: "", bMode: "say", scroll: 0, turn: null, result: null, vnLines: null, vnCursor: 0 };
+        run.current = {
+          moduleId,
+          phase: "mode",
+          mode: moduleId === "A" ? "pulse" : moduleId === "B" ? "cutup" : "lane",
+          modeState: null,
+          input: "",
+          sugar: "三分糖",
+          leaveText: "",
+          bMode: "say",
+          scroll: 0,
+          turn: null,
+          result: null,
+          vnLines: null,
+          vnCursor: 0,
+        };
         state.flow.scene = "turn";
+        initTurnMode(run.current);
         saveState();
         audioBgm(moduleId);
       }
@@ -2542,6 +3652,531 @@
         });
       }
 
+      function drawAnalytics() {
+        ensureTelemetry();
+        const pad = 14;
+        const top = insetTop;
+        const w = aw - pad * 2;
+        const h = ah - top - insetBottom;
+        rrPath(pad, top, w, h, 18);
+        ctx.fillStyle = "rgba(255,255,255,0.04)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.12)";
+        ctx.stroke();
+        ctx.fillStyle = "rgba(255,255,255,0.85)";
+        ctx.font = `800 16px ${fontSans}`;
+        ctx.fillText("数据看板（本地）", pad + 14, top + 30);
+        const x = pad + 14;
+        const innerW = w - 28;
+        const sum = telemetrySummary();
+        const ab = state.telemetry.ab.group || "A";
+        ctx.fillStyle = "rgba(255,255,255,0.70)";
+        ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+        ctx.fillText(`AB分组：${ab} · 安装ID：${String(state.telemetry.installId).slice(0, 10)}…`, x, top + 54);
+
+        rrPath(x, top + 70, innerW, 174, 16);
+        ctx.fillStyle = "rgba(0,0,0,0.18)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.12)";
+        ctx.stroke();
+        ctx.fillStyle = "rgba(255,255,255,0.86)";
+        ctx.font = `800 ${Math.round(13 * uiScale)}px ${fontSans}`;
+        ctx.fillText("核心漏斗（近800事件）", x + 12, top + 96);
+        ctx.fillStyle = "rgba(255,255,255,0.70)";
+        ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+        const e = sum.by;
+        const a = (k) => e[k] || 0;
+        ctx.fillText(`Sessions ${sum.sessions} · ActiveDays ${sum.activeDays} · Events ${sum.events}`, x + 12, top + 120);
+        ctx.fillText(`解谜开始 ${a("puzzle_start")} / 通关 ${a("puzzle_clear")} / 提示 ${a("puzzle_hint")}`, x + 12, top + 144);
+        ctx.fillText(`VN选择 ${a("vn_choice")} / QTE成功 ${a("vn_qte_ok")} / 失败 ${a("vn_qte_fail")}`, x + 12, top + 168);
+        ctx.fillText(`三模式 开始 ${a("mode_start")} / 动作 ${a("mode_action")} / 完成 ${a("mode_end")} / 失败 ${a("mode_fail")}`, x + 12, top + 192);
+        ctx.fillText(`战斗 开始 ${a("battle_start")} / 攻击 ${a("battle_attack")} / 受击 ${a("battle_hit")} / 死亡 ${a("battle_death")}`, x + 12, top + 216);
+
+        const y0 = top + 240;
+        btn("exportMetrics", x, y0, innerW, 56, "复制诊断报告", "primary", () => {
+          const report = {
+            at: new Date().toISOString(),
+            ab,
+            activeDays: sum.activeDays,
+            sessions: sum.sessions,
+            events: sum.by,
+            mirrorFracture: state.mirrorFracture,
+            shards: state.shards,
+          };
+          copyText(JSON.stringify(report, null, 2));
+          toast("已复制");
+        });
+        btn("resetTelemetry", x, y0 + 70, innerW, 56, "清空本地统计", "ghost", () => {
+          state.telemetry.events = [];
+          state.telemetry.sessions = [];
+          saveState();
+          toast("已清空");
+        });
+        btn("backSettings", x, top + h - 74, innerW, 56, "返回设置", "ghost", () => {
+          state.flow.scene = "settings";
+          saveState();
+        });
+      }
+
+      function drawChallengeHome() {
+        ensureChallenge();
+        ensureBoard("daily");
+        ensureBoard("weekly");
+        const pad = 14;
+        const top = insetTop;
+        const w = aw - pad * 2;
+        const h = ah - top - insetBottom;
+        rrPath(pad, top, w, h, 18);
+        ctx.fillStyle = "rgba(255,255,255,0.04)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.12)";
+        ctx.stroke();
+        const x = pad + 14;
+        const innerW = w - 28;
+        ctx.fillStyle = "rgba(255,255,255,0.92)";
+        ctx.font = `900 ${Math.round(16 * uiScale)}px ${fontSans}`;
+        ctx.fillText("每日 / 每周挑战", x, top + 30);
+        ctx.fillStyle = "rgba(255,255,255,0.62)";
+        ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+        ctx.fillText("离线版：本机榜 + 分享码预留；后端版可接跨服匹配", x, top + 52);
+
+        const cardH = 132;
+        rrPath(x, top + 70, innerW, cardH, 16);
+        ctx.fillStyle = "rgba(0,0,0,0.18)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.12)";
+        ctx.stroke();
+        ctx.fillStyle = "rgba(255,255,255,0.90)";
+        ctx.font = `900 ${Math.round(14 * uiScale)}px ${fontSans}`;
+        ctx.fillText("今日", x + 12, top + 96);
+        ctx.fillStyle = "rgba(255,255,255,0.70)";
+        ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+        ctx.fillText(`最佳分 ${state.challenge.best.daily || 0}`, x + 12, top + 122);
+        btn("startDaily", x + innerW - 160, top + 86, 148, 44, "开始", "primary", () => startChallenge("daily"));
+        btn("boardDaily", x + innerW - 160, top + 136, 148, 44, "排行榜", "ghost", () => {
+          state.flow.challengeTab = "daily";
+          saveState();
+        });
+
+        rrPath(x, top + 214, innerW, cardH, 16);
+        ctx.fillStyle = "rgba(0,0,0,0.18)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.12)";
+        ctx.stroke();
+        ctx.fillStyle = "rgba(255,255,255,0.90)";
+        ctx.font = `900 ${Math.round(14 * uiScale)}px ${fontSans}`;
+        ctx.fillText("本周", x + 12, top + 240);
+        ctx.fillStyle = "rgba(255,255,255,0.70)";
+        ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+        ctx.fillText(`最佳分 ${state.challenge.best.weekly || 0}`, x + 12, top + 266);
+        btn("startWeekly", x + innerW - 160, top + 230, 148, 44, "开始", "primary", () => startChallenge("weekly"));
+        btn("boardWeekly", x + innerW - 160, top + 280, 148, 44, "排行榜", "ghost", () => {
+          state.flow.challengeTab = "weekly";
+          saveState();
+        });
+
+        const tab = state.flow.challengeTab || "daily";
+        const board = (state.challenge.board && state.challenge.board[tab]) || [];
+        rrPath(x, top + 360, innerW, h - 448, 16);
+        ctx.fillStyle = "rgba(255,255,255,0.03)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.10)";
+        ctx.stroke();
+        ctx.fillStyle = "rgba(255,255,255,0.86)";
+        ctx.font = `800 ${Math.round(13 * uiScale)}px ${fontSans}`;
+        ctx.fillText(`${tab === "daily" ? "今日榜" : "本周榜"}（离线模拟）`, x + 12, top + 388);
+        let yy = top + 410;
+        for (let i = 0; i < Math.min(10, board.length); i++) {
+          const it = board[i];
+          ctx.fillStyle = "rgba(255,255,255,0.72)";
+          ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+          ctx.fillText(`${i + 1}. ${it.name}`, x + 12, yy);
+          ctx.fillStyle = "rgba(255,255,255,0.62)";
+          ctx.fillText(String(it.score), x + innerW - 70, yy);
+          yy += 22;
+        }
+        btn("backHub2", x, top + h - 74, innerW, 56, "返回工位", "ghost", () => gotoHub());
+      }
+
+      function drawSkills() {
+        ensureSkills();
+        const pad = 14;
+        const top = insetTop;
+        const w = aw - pad * 2;
+        const h = ah - top - insetBottom;
+        rrPath(pad, top, w, h, 18);
+        ctx.fillStyle = "rgba(255,255,255,0.04)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.12)";
+        ctx.stroke();
+        const x = pad + 14;
+        const innerW = w - 28;
+        ctx.fillStyle = "rgba(255,255,255,0.92)";
+        ctx.font = `900 ${Math.round(16 * uiScale)}px ${fontSans}`;
+        ctx.fillText("成长 · 技能树", x, top + 30);
+        ctx.fillStyle = "rgba(255,255,255,0.62)";
+        ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+        ctx.fillText(`技能点 ${state.skills.points} · 重置消耗 红豆×2`, x, top + 52);
+
+        const tab = state.flow.skillTab || "mind";
+        const bw = (innerW - 20) / 3;
+        btn("tabMind", x, top + 70, bw, 44, "心智", tab === "mind" ? "primary" : "ghost", () => {
+          state.flow.skillTab = "mind";
+          saveState();
+        });
+        btn("tabBond", x + bw + 10, top + 70, bw, 44, "关系", tab === "bond" ? "primary" : "ghost", () => {
+          state.flow.skillTab = "bond";
+          saveState();
+        });
+        btn("tabMotion", x + (bw + 10) * 2, top + 70, bw, 44, "行动", tab === "motion" ? "primary" : "ghost", () => {
+          state.flow.skillTab = "motion";
+          saveState();
+        });
+
+        const list = SKILL_DEFS.filter((s) => s.tree === tab);
+        const viewY = top + 128;
+        const viewH = h - 212;
+        const scrollMax = 820;
+        state.flow.skillScroll = clamp(state.flow.skillScroll || 0, 0, scrollMax);
+        ui.items.push({ type: "scroll", id: "skillScroll", r: { x, y: viewY, w: innerW, h: viewH } });
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x, viewY, innerW, viewH);
+        ctx.clip();
+        ctx.translate(0, -state.flow.skillScroll);
+        let yy = viewY;
+        for (let i = 0; i < list.length; i++) {
+          const s = list[i];
+          const on = skillHas(s.id);
+          const can = canUnlockSkill(s.id);
+          rrPath(x, yy, innerW, 72, 16);
+          ctx.fillStyle = on ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.18)";
+          ctx.fill();
+          ctx.strokeStyle = on ? "rgba(34,211,238,0.26)" : "rgba(255,255,255,0.10)";
+          ctx.stroke();
+          ctx.fillStyle = on ? "rgba(255,255,255,0.92)" : can ? "rgba(255,255,255,0.86)" : "rgba(255,255,255,0.55)";
+          ctx.font = `900 ${Math.round(13 * uiScale)}px ${fontSans}`;
+          ctx.fillText(s.name, x + 14, yy + 30);
+          ctx.fillStyle = "rgba(255,255,255,0.62)";
+          ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+          ctx.fillText(s.desc, x + 14, yy + 54);
+          btn(`skillBtn_${s.id}`, x + innerW - 120, yy + 18, 108, 42, on ? "已解锁" : can ? "解锁" : "条件", on ? "ghost" : can ? "primary" : "ghost", () => unlockSkill(s.id));
+          yy += 82;
+        }
+        ctx.restore();
+
+        btn("skillsReset", x, top + h - 74, (innerW - 14) / 2, 56, "重置", "ghost", () => resetSkills());
+        btn("skillsBack", x + (innerW - 14) / 2 + 14, top + h - 74, (innerW - 14) / 2, 56, "返回设置", "primary", () => {
+          state.flow.scene = "settings";
+          saveState();
+        });
+      }
+
+      function battleWeatherMult(mapFx, elemId) {
+        const w = mapFx && mapFx.weather ? mapFx.weather : "clear";
+        if (w === "rain" && elemId === "water") return 1.12;
+        if (w === "storm" && elemId === "electro") return 1.12;
+        if (w === "windy" && elemId === "wind") return 1.10;
+        if (w === "fog" && elemId === "dark") return 1.10;
+        return 1;
+      }
+      function battleApplyFx(kind) {
+        if (kind === "flash") {
+          state.vn2.runtime = state.vn2.runtime || vn2MakeRuntime();
+          state.vn2.runtime.flashAt = now();
+          state.vn2.runtime.flashPow = 0.35;
+        }
+        if (kind === "shake") {
+          state.vn2.runtime = state.vn2.runtime || vn2MakeRuntime();
+          state.vn2.runtime.shakeAt = now();
+          state.vn2.runtime.shakePow = 1.1;
+        }
+      }
+
+      function drawBattle() {
+        const b = state.flow.battle;
+        const ch = state.flow.challenge;
+        if (!b) {
+          openChallengeHome();
+          return;
+        }
+        const pad = 14;
+        const top = insetTop;
+        const w = aw - pad * 2;
+        const h = ah - top - insetBottom;
+        const x = pad + 14;
+        const innerW = w - 28;
+        const innerH = h;
+        const t = now();
+        const map = mapById(b.mapId);
+        const bgKey = map.baseBg;
+        rrPath(x, top + 14, innerW, innerH - 28, 18);
+        drawDrawerBg({ bgKey, bgFrom: bgKey, bgT0: t }, pad, top, w, h);
+        drawHorrorFX(0.12 + state.mirrorFracture * 0.02, "battle|" + String(b.startedAt));
+
+        const weather = b.mapFx && b.mapFx.weather ? b.mapFx.weather : "clear";
+        const part = b.mapFx && b.mapFx.part ? b.mapFx.part : vn2DayPart();
+        ctx.fillStyle = "rgba(255,255,255,0.88)";
+        ctx.font = `900 ${Math.round(14 * uiScale)}px ${fontSans}`;
+        ctx.fillText(`挑战战斗 · ${map.name}`, x + 14, top + 38);
+        ctx.fillStyle = "rgba(255,255,255,0.62)";
+        ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+        ctx.fillText(`${part === "morning" ? "清晨" : part === "afternoon" ? "下午" : "夜晚"} · 天气 ${weather}`, x + 14, top + 60);
+
+        if (!b.lastTickAt) b.lastTickAt = t;
+        const dt = clamp((t - b.lastTickAt) / 1000, 0, 0.05);
+        b.lastTickAt = t;
+        b.status = b.status && typeof b.status === "object" ? b.status : { enemy: {}, player: {} };
+        b.status.enemy = b.status.enemy && typeof b.status.enemy === "object" ? b.status.enemy : {};
+        b.status.player = b.status.player && typeof b.status.player === "object" ? b.status.player : {};
+
+        const es = equipStats();
+        const comboWindow = 1.2 + ((state.stats.modeLast && state.stats.modeLast.A && state.stats.modeLast.A.best) || 0) * 0.02 + skillStat("comboWin") + (es.comboWin || 0);
+        if (b.combo && b.combo.lastAt && t - b.combo.lastAt > comboWindow * 1000) {
+          b.combo.n = 0;
+          b.combo.mult = 1;
+        }
+        if (!b.enemyNextAt) b.enemyNextAt = t + 1400;
+        if (!b.endedAt && t >= b.enemyNextAt) {
+          const slow = b.status.enemy.slowUntil && t < b.status.enemy.slowUntil ? 1 : 0;
+          b.enemyNextAt = t + Math.round(1800 * (slow ? 1.35 : 1));
+          let dmg = b.enemy.atk;
+          dmg = Math.max(1, dmg - skillStat("drFlat") - (es.drFlat || 0));
+          if (b.player.shield > 0) {
+            const block = Math.min(b.player.shield, dmg);
+            b.player.shield -= block;
+            dmg -= block;
+          }
+          if (dmg > 0) b.player.hp = clamp(b.player.hp - dmg, 0, b.player.hpMax);
+          track("battle_hit", { dmg });
+          if (b.player.hp <= 0) {
+            b.endedAt = now();
+            b.win = false;
+            track("battle_death", { mapId: b.mapId, step: ch ? ch.step : 0, durMs: now() - (b.startedAt || now()) });
+            track("battle_end", { win: 0 });
+          }
+          saveState();
+        }
+
+        if (!b.endedAt) {
+          const dotKeys = ["burn", "shock"];
+          for (let i = 0; i < dotKeys.length; i++) {
+            const k = dotKeys[i];
+            const st = b.status.enemy[k];
+            if (!st) continue;
+            if (st.ticksLeft <= 0 || (st.until && t > st.until)) {
+              delete b.status.enemy[k];
+              continue;
+            }
+            if (!st.nextAt) st.nextAt = t + 700;
+            if (t >= st.nextAt) {
+              st.nextAt = t + 900;
+              st.ticksLeft -= 1;
+              const d = Math.max(1, Math.round(st.dmg || 2));
+              b.enemy.hp = clamp(b.enemy.hp - d, 0, b.enemy.hpMax);
+              track("battle_dot", { id: k, dmg: d });
+              if (b.enemy.hp <= 0) {
+                b.endedAt = now();
+                b.win = true;
+                track("battle_end", { win: 1, via: "dot" });
+              }
+              saveState();
+            }
+          }
+        }
+
+        const enemyHpP = clamp(b.enemy.hp / b.enemy.hpMax, 0, 1);
+        rrPath(x + 14, top + 78, innerW - 28, 14, 999);
+        ctx.fillStyle = "rgba(0,0,0,0.22)";
+        ctx.fill();
+        rrPath(x + 14, top + 78, (innerW - 28) * enemyHpP, 14, 999);
+        ctx.fillStyle = "rgba(255,77,109,0.55)";
+        ctx.fill();
+        ctx.fillStyle = "rgba(255,255,255,0.86)";
+        ctx.font = `800 ${Math.round(12 * uiScale)}px ${fontSans}`;
+        ctx.fillText(`${b.enemy.name}  ${Math.ceil(b.enemy.hp)}/${b.enemy.hpMax}`, x + 14, top + 112);
+        {
+          const tags = [];
+          if (b.status.enemy.brittleUntil && t < b.status.enemy.brittleUntil) tags.push("易碎");
+          if (b.status.enemy.slowUntil && t < b.status.enemy.slowUntil) tags.push("泥泞");
+          if (b.status.enemy.burn && b.status.enemy.burn.ticksLeft > 0) tags.push("灼烧");
+          if (b.status.enemy.shock && b.status.enemy.shock.ticksLeft > 0) tags.push("感电");
+          if (tags.length) {
+            ctx.fillStyle = "rgba(255,255,255,0.52)";
+            ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+            ctx.fillText(tags.join(" · "), x + 14, top + 132);
+          }
+        }
+
+        const hpP = clamp(b.player.hp / b.player.hpMax, 0, 1);
+        rrPath(x + 14, top + 122, innerW - 28, 12, 999);
+        ctx.fillStyle = "rgba(0,0,0,0.22)";
+        ctx.fill();
+        rrPath(x + 14, top + 122, (innerW - 28) * hpP, 12, 999);
+        ctx.fillStyle = "rgba(34,211,238,0.45)";
+        ctx.fill();
+        ctx.fillStyle = "rgba(255,255,255,0.62)";
+        ctx.fillText(`你  ${Math.ceil(b.player.hp)}/${b.player.hpMax}  护盾 ${Math.ceil(b.player.shield)}`, x + 14, top + 150);
+
+        ctx.fillStyle = "rgba(255,255,255,0.70)";
+        ctx.fillText(`连击 x${b.combo.mult.toFixed(1)}  (${b.combo.n || 0})`, x + innerW - 150, top + 150);
+
+        const gridY = top + 168;
+        const gridH = innerH - 330;
+        rrPath(x + 14, gridY, innerW - 28, gridH, 18);
+        ctx.fillStyle = "rgba(0,0,0,0.18)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.10)";
+        ctx.stroke();
+        ctx.fillStyle = "rgba(255,255,255,0.62)";
+        ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+        wrapText("提示：连续点击维持连击；切换元素触发反应。\n夜晚的“暗/光”更容易爆发，雨天“水/电”更强。", x + 26, gridY + 28, innerW - 52, Math.round(18 * uiScale), "rgba(255,255,255,0.62)");
+
+        const btnY = top + innerH - 144;
+        const bw = (innerW - 28 - 14) / 2;
+        btn("battleAtk", x + 14, btnY, bw, 56, "攻击", "primary", () => {
+          if (b.endedAt) return;
+          const elem = b.elemPick || "fire";
+          const base = 8;
+          const wmul = battleWeatherMult(b.mapFx, elem);
+          const inCombo = b.combo.lastAt && t - b.combo.lastAt < 1200;
+          if (inCombo) b.combo.n = (b.combo.n || 0) + 1;
+          else b.combo.n = 1;
+          b.combo.lastAt = t;
+          b.combo.mult = clamp(1 + Math.floor(b.combo.n / 5) * 0.2, 1, 2.2 + skillStat("comboCap"));
+          let dmg = base * b.combo.mult * wmul * (1 + skillStat("dmg") + (es.dmg || 0));
+          const pair = b.lastElem ? `${b.lastElem}+${elem}` : "";
+          const rx = pair && REACTIONS[pair] ? REACTIONS[pair] : null;
+          if (rx) {
+            dmg *= rx.dmg * (1 + skillStat("rxDmg"));
+            if (b.status.enemy.brittleUntil && t < b.status.enemy.brittleUntil) dmg *= 1.15;
+            b.log.unshift({ t: now(), text: `反应：${rx.name}` });
+            if (rx.fx) audioSfx(rx.fx === "shake" ? "important" : rx.fx === "flash" ? "shutter" : "ui");
+            if (rx.dot) {
+              const id = rx.id === "burn" ? "burn" : rx.id === "shock" ? "shock" : rx.id;
+              const per = Math.max(1, Math.round(base * 0.22 * b.combo.mult));
+              b.status.enemy[id] = { ticksLeft: rx.dot, dmg: per, nextAt: now() + 700, until: now() + 900 * (rx.dot + 1) };
+            }
+            if (rx.debuff === "brittle") b.status.enemy.brittleUntil = now() + 4200;
+            if (rx.slow) b.status.enemy.slowUntil = now() + 4200;
+            if (rx.heal) b.player.hp = clamp(b.player.hp + rx.heal, 0, b.player.hpMax);
+          } else {
+            audioSfx("click");
+          }
+          if (elem === "earth" || elem === "metal") b.player.shield = clamp((b.player.shield || 0) + 6 + skillStat("shieldPlus"), 0, 24);
+          if (elem === "wood") b.player.hp = clamp(b.player.hp + (2 + skillStat("healFlat")) * (1 + skillStat("healMult")), 0, b.player.hpMax);
+          b.enemy.hp = clamp(b.enemy.hp - dmg, 0, b.enemy.hpMax);
+          b.lastElem = elem;
+          track("battle_attack", { elem, dmg: Math.round(dmg), combo: b.combo.n });
+          if (b.enemy.hp <= 0) {
+            b.endedAt = now();
+            b.win = true;
+            track("battle_end", { win: 1 });
+            state.skills.points = (state.skills.points || 0) + 1;
+            const loot = rollItem(String(ch ? ch.seed : now()) + "|loot|" + String(b.endedAt));
+            invAddItem(loot);
+            if (ch) {
+              const bonus = Math.round((200 + Math.round(b.combo.n * 6) + Math.round((b.player.hp / b.player.hpMax) * 120)) * (1 + skillStat("score")));
+              ch.score += bonus;
+              ch.step += 1;
+              ch.log.unshift({ t: now(), text: `击败 ${b.enemy.name} +${bonus}` });
+              const m = mapById(ch.mapId);
+              const canHidden = m && m.hiddenCond ? vn2EvalCond(m.hiddenCond) : false;
+              if (!ch.hiddenTaken && canHidden) {
+                ch.hiddenTaken = 1;
+                const bonus2 = 180 + ((hash32(String(ch.seed) + "|hidden") % 120) | 0);
+                ch.score += bonus2;
+                ch.log.unshift({ t: now(), text: `发现隐藏区域 +${bonus2}` });
+                invAddItem(rollItem(String(ch.seed) + "|hiddenloot|" + String(b.endedAt)));
+                track("map_hidden", { mapId: ch.mapId });
+              }
+              saveState();
+              if (ch.kind === "daily" && ch.step >= 3) ch.endedAt = now();
+              if (ch.kind === "weekly" && ch.step >= 5) ch.endedAt = now();
+            }
+          }
+          saveState();
+        });
+        btn("battleElem", x + 28 + bw, btnY, bw, 56, `元素：${(ELEMENTS.find((e) => e.id === (b.elemPick || "")) || ELEMENTS[0]).name}`, "ghost", () => {
+          b.elemPick = b.elemPick || "fire";
+          const idx = Math.max(0, ELEMENTS.findIndex((e) => e.id === b.elemPick));
+          b.elemPick = ELEMENTS[(idx + 1) % ELEMENTS.length].id;
+          track("battle_elem", { elem: b.elemPick });
+          saveState();
+        });
+
+        const rowY = top + innerH - 210;
+        const cols = 5;
+        const ew = (innerW - 28 - (cols - 1) * 10) / cols;
+        for (let i = 0; i < ELEMENTS.length; i++) {
+          const e0 = ELEMENTS[i];
+          const row = Math.floor(i / cols);
+          const col = i % cols;
+          const ex = x + 14 + col * (ew + 10);
+          const ey = rowY + row * 54;
+          const sel = (b.elemPick || "fire") === e0.id;
+          rrPath(ex, ey, ew, 44, 14);
+          ctx.fillStyle = sel ? e0.c.replace("0.85", "0.22").replace("0.90", "0.22").replace("0.92", "0.22").replace("0.70", "0.22") : "rgba(255,255,255,0.06)";
+          ctx.fill();
+          ctx.strokeStyle = sel ? e0.c.replace("0.85", "0.55").replace("0.90", "0.55").replace("0.92", "0.55").replace("0.70", "0.55") : "rgba(255,255,255,0.10)";
+          ctx.stroke();
+          ctx.fillStyle = "rgba(255,255,255,0.92)";
+          ctx.font = `800 ${Math.round(13 * uiScale)}px ${fontSans}`;
+          const tw = ctx.measureText(e0.name).width;
+          ctx.fillText(e0.name, ex + (ew - tw) / 2, ey + 28);
+          hot2(`elem_${e0.id}`, ex, ey, ew, 44, "ui", "light", () => {
+            b.elemPick = e0.id;
+            track("battle_elem", { elem: b.elemPick });
+            saveState();
+          });
+        }
+
+        btn("battleBack", x, top + h - 74, innerW, 56, "返回挑战页", "ghost", () => {
+          state.flow.battle = null;
+          openChallengeHome();
+        });
+
+        if (b.endedAt) {
+          ctx.fillStyle = "rgba(0,0,0,0.55)";
+          ctx.fillRect(0, 0, aw, ah);
+          rrPath(x + 14, top + 160, innerW - 28, 220, 18);
+          ctx.fillStyle = "rgba(0,0,0,0.52)";
+          ctx.fill();
+          ctx.strokeStyle = "rgba(255,255,255,0.14)";
+          ctx.stroke();
+          ctx.fillStyle = "rgba(255,255,255,0.92)";
+          ctx.font = `900 ${Math.round(16 * uiScale)}px ${fontSans}`;
+          ctx.fillText(b.win ? "胜利" : "失败", x + 30, top + 194);
+          ctx.fillStyle = "rgba(255,255,255,0.70)";
+          ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+          ctx.fillText(b.win ? "你把它打散了，但你知道它还会回来。" : "你被它追上了，但主线不会断。", x + 30, top + 222);
+          if (ch && ch.endedAt && b.win) {
+            const kind = ch.kind;
+            const best = state.challenge.best[kind] || 0;
+            if (ch.score > best) state.challenge.best[kind] = ch.score;
+            saveState();
+            btn("endToHome", x + 30, top + 250, innerW - 60, 56, `结算：总分 ${ch.score}`, "primary", () => {
+              track("challenge_end", { kind, score: ch.score });
+              boardInsert(kind, "你", ch.score);
+              state.flow.battle = null;
+              state.flow.challenge = null;
+              openChallengeHome();
+            });
+          } else if (b.win && ch) {
+            btn("nextFight", x + 30, top + 250, innerW - 60, 56, "继续下一战", "primary", () => {
+              state.flow.battle = null;
+              startBattleFromChallenge();
+            });
+          } else {
+            btn("retryFight", x + 30, top + 250, innerW - 60, 56, "重试", "primary", () => {
+              state.flow.battle = null;
+              startBattleFromChallenge();
+            });
+          }
+        }
+      }
+
       function puzzleNode(def, id) {
         const ns = def.graph.nodes;
         for (let i = 0; i < ns.length; i++) if (ns[i].id === id) return ns[i];
@@ -2618,8 +4253,9 @@
         const centerY = y0 + innerH * 0.52;
         const unit = Math.min(innerW, innerH) * 0.16 * cam.zoom;
 
-        const bgKey = def.id === "p1" ? "mirror_council" : def.id === "p2" ? "bar" : "road";
+        const bgKey = def.id === "p1" ? "corridor" : def.id === "p2" ? "corridor" : def.id === "p3" ? "corridor" : "mirror_council";
         drawDrawerBg({ bgKey, bgFrom: bgKey, bgT0: t }, pad, top, w, h);
+        drawHorrorFX(0.12 + state.mirrorFracture * 0.02, def.id + "|" + rt.rot + "|" + rt.player);
 
         const nodes = def.graph.nodes;
         const edges = def.graph.edges;
@@ -2734,6 +4370,7 @@
               state.puzzle.stats[def.id].clears += 1;
               state.puzzle.stats[def.id].totalTimeMs += dur;
               state.puzzle.stats[def.id].hintClicks += rt.hints;
+              track("puzzle_clear", { id: def.id, durMs: dur, hints: rt.hints });
               saveState();
             }
           }
@@ -2742,6 +4379,12 @@
         ctx.restore();
 
         if (rt.phase === "intro") {
+          if (!rt.introOnce) {
+            rt.introOnce = 1;
+            audioSfx("whisper");
+            if (navigator.vibrate) navigator.vibrate(8);
+            saveState();
+          }
           const p = clamp((t - rt.introAt) / 2600, 0, 1);
           const k = easeOutQuint(p);
           rt.cam.tx = lerp(def.graph.cam.x + 0.4, def.graph.cam.x, k);
@@ -2824,13 +4467,13 @@
           btn("pzRotL", px + 14, py + 64, bw, 56, "左旋", "primary", () => {
             rt.rot = (rt.rot + 3) % 4;
             addRipple(px + 14 + bw * 0.5, py + 92, "rgba(34,211,238,0.18)");
-            audioSfx("ui");
+            audioSfx("whisper");
             saveState();
           });
           btn("pzRotR", px + 28 + bw, py + 64, bw, 56, "右旋", "primary", () => {
             rt.rot = (rt.rot + 1) % 4;
             addRipple(px + 28 + bw + bw * 0.5, py + 92, "rgba(34,211,238,0.18)");
-            audioSfx("ui");
+            audioSfx("whisper");
             saveState();
           });
           if (def.mech.lift) {
@@ -2846,6 +4489,7 @@
           btn("pzHint", px + 14, py + 124, bw, 40, "提示", "ghost", () => {
             rt.hintAt = now();
             rt.hints += 1;
+            track("puzzle_hint", { id: def.id, n: rt.hints });
             saveState();
           });
           btn("pzExit", px + 28 + bw, py + 124, bw, 40, "退出", "ghost", () => {
@@ -2917,6 +4561,12 @@
           const ftw = ctx.measureText(fpsText).width;
           ctx.fillText(fpsText, right - ftw, y0 + 22);
         }
+        const bx = aw - pad - 44;
+        btn("openInv", bx - 44 * 4 - 18, y0 + 10, 44, 36, "包", "ghost", () => openDrawer("inv"));
+        btn("openTasks", bx - 44 * 3 - 12, y0 + 10, 44, 36, "任务", "ghost", () => openRightTab("tasks"));
+        btn("openAch", bx - 44 * 2 - 6, y0 + 10, 44, 36, "成就", "ghost", () => openRightTab("ach"));
+        btn("openSet", bx - 44 * 1, y0 + 10, 44, 36, "设", "ghost", () => openRightTab("settings"));
+
         hot("topTitle", pad, y0, aw - pad * 2, h, () => {
           state.flow.scene = "help";
           saveState();
@@ -3014,20 +4664,21 @@
           btn("drawerPuzzle", dx, quickY + 70, dw, 56, "解谜关卡（镜面建筑）", "primary", () => {
             startPuzzle("p1");
           });
-          btn("drawerUGC", dx, quickY + 140, dw, 56, "UGC创意工坊", "ghost", () => {
+          btn("drawerDaily", dx, quickY + 140, dw, 56, "每日/每周挑战（战斗+掉落）", "primary", () => openChallengeHome());
+          btn("drawerUGC", dx, quickY + 210, dw, 56, "UGC创意工坊", "ghost", () => {
             state.flow.scene = "ugcFeed";
             state.flow.ugcDraft = ugcDefaultDraft();
             saveState();
           });
-          btn("drawerTree", dx, quickY + 210, dw, 56, "章节树/收藏册", "ghost", () => {
+          btn("drawerTree", dx, quickY + 280, dw, 56, "章节树/收藏册", "ghost", () => {
             state.flow.scene = "chapterTree";
             saveState();
           });
-          btn("drawerSettings", dx, quickY + 280, dw, 56, "设置", "ghost", () => {
+          btn("drawerSettings", dx, quickY + 350, dw, 56, "设置", "ghost", () => {
             state.flow.scene = "settings";
             saveState();
           });
-          btn("drawerAch", dx, quickY + 350, dw, 56, "成就", "ghost", () => {
+          btn("drawerAch", dx, quickY + 420, dw, 56, "成就", "ghost", () => {
             state.flow.scene = "achievements";
             saveState();
           });
@@ -3128,7 +4779,37 @@
         if (key === "letter") return ["#17120a", "#1b1420", "#0b0f1c", "#07090f"];
         if (key === "road") return ["#0b0a18", "#121a30", "#1a0f2a", "#07090f"];
         if (key === "mirror_council") return ["#04050a", "#121a30", "#1a0f2a", "#07090f"];
+        if (key === "corridor") return ["#03040a", "#0b1022", "#090616", "#07090f"];
         return ["#07090f", "#0c1020", "#07121a", "#0b0f1c"];
+      }
+
+      function drawHorrorFX(intensity, seed) {
+        const p = clamp(intensity || 0, 0, 1);
+        if (p <= 0.01) return;
+        const r = mulberry32(hash32(String(seed || 0) + "|" + String((now() / 120) | 0)));
+        const g = ctx.createRadialGradient(aw * 0.5, ah * 0.55, Math.min(aw, ah) * 0.10, aw * 0.5, ah * 0.55, Math.max(aw, ah) * 0.75);
+        g.addColorStop(0, `rgba(0,0,0,${0.00})`);
+        g.addColorStop(1, `rgba(0,0,0,${0.55 * p})`);
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, aw, ah);
+
+        ctx.save();
+        ctx.globalAlpha = 0.14 * p;
+        const lines = 8 + ((p * 10) | 0);
+        for (let i = 0; i < lines; i++) {
+          const y = (r() * ah) | 0;
+          const h = 1 + ((r() * 2) | 0);
+          ctx.fillStyle = `rgba(255,255,255,${0.10 + r() * 0.12})`;
+          ctx.fillRect(0, y, aw, h);
+        }
+        const specks = 120 + ((p * 260) | 0);
+        for (let i = 0; i < specks; i++) {
+          const x = (r() * aw) | 0;
+          const y = (r() * ah) | 0;
+          ctx.fillStyle = `rgba(255,255,255,${0.04 + r() * 0.08})`;
+          ctx.fillRect(x, y, 1, 1);
+        }
+        ctx.restore();
       }
 
       function drawDrawerCard(r, z, blur, it, isFocus) {
@@ -3587,7 +5268,205 @@
       function vn2GetConfig() {
         const s = state.vn2;
         if (!s.config || typeof s.config !== "object") s.config = VN2_DEFAULT_CONFIG;
+        const ch = Array.isArray(s.config.chapters) ? s.config.chapters : [];
+        if (ch.length < 8 || s.config.genVer !== 2) s.config = vn2MakeGeneratedConfig();
         return s.config;
+      }
+      function vn2MakeGeneratedConfig() {
+        const cfg = { schemaVersion: 1, genVer: 2, generatedAt: now(), chapters: [], nodes: [], choices: [] };
+        const addNode = (n) => cfg.nodes.push(n);
+        const addChoice = (c) => cfg.choices.push(c);
+        const actTitle = [
+          "第一幕·雨灯",
+          "第二幕·回声池",
+          "第三幕·未寄出的信",
+          "第四幕·镜面走廊",
+          "第五幕·逆风公路",
+          "第六幕·图腾升降",
+          "第七幕·颜色之门",
+          "第八幕·议会与回信",
+          "第九幕·碎镜计划",
+          "第十幕·你与算法",
+          "第十一幕·别回头的人",
+        ];
+        const chars = ["cat", "mirror", "classmate", "director"];
+        for (let a = 1; a <= 11; a++) {
+          const chapterId = `act${a}`;
+          const entry = `${chapterId}_n0`;
+          cfg.chapters.push({ chapterId, title: actTitle[a - 1], entryNodeId: entry, unlockCondition: a === 1 ? "" : `flag(\"act${a - 1}_done\")` });
+          addNode({
+            nodeId: entry,
+            chapterId,
+            type: "dialog",
+            speaker: a % 2 === 0 ? "镜子" : "猫",
+            charId: a % 2 === 0 ? "mirror" : "cat",
+            bgKey: a <= 2 ? "bar" : a === 3 ? "letter" : a === 4 ? "corridor" : a === 5 ? "road" : a >= 6 ? "corridor" : "mirror_council",
+            bgmKey: a === 4 || a >= 6 ? "horror" : a <= 2 ? "A" : a <= 3 ? "B" : a === 5 ? "C" : "final",
+            text: `23:59。{{dp}}。\\n屏幕背光像薄雾，你听见抽屉里有一声很轻的敲击。\\n裂纹{{fracture}}，心情{{mood}}。`,
+            effectsOnEnter: `add(philo,1);bubble(\"你确定刚才那声不是你自己的心跳吗\")`,
+            rollbackable: 1,
+            next: a >= 9 ? `${chapterId}_k1` : `${chapterId}_n1`,
+          });
+          if (a >= 9) {
+            for (let k = 1; k <= 5; k++) {
+              addNode({
+                nodeId: `${chapterId}_k${k}`,
+                chapterId,
+                type: "dialog",
+                speaker: k % 2 ? "镜子" : "导演",
+                charId: k % 2 ? "mirror" : "director",
+                bgKey: "corridor",
+                bgmKey: "horror",
+                text:
+                  k === 1
+                    ? "任务节点1：你决定先把手机放下。\\n不是逃避，是把注意力收回来。"
+                    : k === 2
+                      ? "任务节点2：你删掉一个群聊置顶。\\n你不是不合群，你是把自己从噪声里拎出来。"
+                      : k === 3
+                        ? "任务节点3：你把一句话写成五个字。\\n短到不会被误解，长到足够诚实。"
+                        : k === 4
+                          ? "任务节点4：你在走廊里换了一次道。\\n你突然发现：你一直在给别人让路。"
+                          : "任务节点5：你回头看一眼。\\n那不是鬼，是你没被照顾过的那部分自己。",
+                effectsOnEnter: `set(flag_task_${chapterId}_k${k},1);bubble(\"完成：${actTitle[a - 1]}·节点${k}\")`,
+                rollbackable: 1,
+                next: k < 5 ? `${chapterId}_k${k + 1}` : `${chapterId}_n1`,
+              });
+            }
+          }
+          addNode({
+            nodeId: `${chapterId}_n1`,
+            chapterId,
+            type: "dialog",
+            speaker: a % 3 === 0 ? "同桌" : a % 3 === 1 ? "猫" : "导演",
+            charId: a % 3 === 0 ? "classmate" : a % 3 === 1 ? "cat" : "director",
+            text:
+              a === 1
+                ? "猫说：先别急着赢。\\n你要先学会承认：你其实很怕。"
+                : a === 2
+                  ? "镜子说：回声不是安慰。\\n回声只是把你没说完的那句，送回你手里。"
+                  : a === 3
+                    ? "同桌说：你不是没用，你是太久没有被允许脆弱。\\n今天我们只做一个小动作。"
+                    : a === 4
+                      ? "走廊开始旋转。\\n你听到有人在你背后同步脚步，却看不见影子。"
+                      : a === 5
+                        ? "导演说：年轻人的勇敢很省电。\\n你只要别在同一个夜里，把自己耗光。"
+                        : a === 6
+                          ? "图腾升起时，你突然想起：有些上升，靠的是你一直在下坠。\\n你要不要按下去？"
+                          : a === 7
+                            ? "颜色像提示，也像审判。\\n你开始怀疑：是不是你先被标了颜色，才被允许过桥。"
+                : a === 8
+                  ? "议会里没有人看你。\\n但每一面镜子都在记你。"
+                  : a === 9
+                    ? "镜子说：你以为你在和鬼对峙，其实你在和“必须有用”对峙。"
+                    : a === 10
+                      ? "导演说：算法不理解你，但它会学会复制你。\\n你要不要先学会拒绝它？"
+                      : "同桌说：别回头不是勇敢，是你终于不再用痛苦证明存在。",
+            rollbackable: 1,
+            next: `${chapterId}_c0`,
+          });
+          addNode({
+            nodeId: `${chapterId}_c0`,
+            chapterId,
+            type: "choice",
+            speaker: "",
+            text: "选一个动作（会影响后续好感度/任务奖励/隐藏事件）",
+            rollbackable: 1,
+          });
+
+          const baseAff = a % 2 === 0 ? "mirror" : "cat";
+          const qteNode = `${chapterId}_qte`;
+          addNode({
+            nodeId: qteNode,
+            chapterId,
+            type: "qte",
+            speaker: "导演",
+            charId: "director",
+            text: "QTE：0.8秒内点击画面（别让它跟上来）",
+            qteMs: 800,
+            successNext: `${chapterId}_ok`,
+            failNext: `${chapterId}_fail`,
+            rollbackable: 0,
+          });
+          addNode({
+            nodeId: `${chapterId}_ok`,
+            chapterId,
+            type: "dialog",
+            speaker: "镜子",
+            charId: "mirror",
+            text: "你抓住了那一下。\\n像在拥挤的地铁里，抢回一点点属于自己的呼吸。",
+            effectsOnEnter: `add(aff_${baseAff},2);set(flag_${chapterId}_qte,1);flash(0.35)`,
+            next: `${chapterId}_end`,
+          });
+          addNode({
+            nodeId: `${chapterId}_fail`,
+            chapterId,
+            type: "dialog",
+            speaker: "猫",
+            charId: "cat",
+            text: "你慢了一点点。\\n灯光闪了一下，走廊像吞了一口气。\\n惩罚不是阻止你，只是把你推回更真实的那边。",
+            effectsOnEnter: `add(aff_${baseAff},1);set(flag_${chapterId}_qte,0);set(flag_${chapterId}_penalty,1);shake(1.2);bubble(\"别回头\")`,
+            next: `${chapterId}_end`,
+          });
+          addNode({
+            nodeId: `${chapterId}_end`,
+            chapterId,
+            type: "ending",
+            speaker: "",
+            text: `结局：${actTitle[a - 1]} · {{if:flag_${chapterId}_qte?及时|迟到}}`,
+            effectsOnEnter: `set(flag_${chapterId}_done,1);set(flag_act${a}_done,1)`,
+            next: a < 8 ? `act${a + 1}_n0` : "",
+          });
+
+          addChoice({
+            choiceId: `${chapterId}_A`,
+            nodeId: `${chapterId}_c0`,
+            text: "把话说短（更锋利）",
+            condition: "",
+            effects: `add(aff_${baseAff},1);set(flag_${chapterId}_short,1);add(aff_director,1)`,
+            jumpToNodeId: qteNode,
+          });
+          addChoice({
+            choiceId: `${chapterId}_B`,
+            nodeId: `${chapterId}_c0`,
+            text: "把话说真（更温柔）",
+            condition: "",
+            effects: `add(aff_${baseAff},2);set(flag_${chapterId}_true,1);add(aff_classmate,1)`,
+            jumpToNodeId: qteNode,
+          });
+          addChoice({
+            choiceId: `${chapterId}_C`,
+            nodeId: `${chapterId}_c0`,
+            text: "先不说（留给明天）",
+            condition: "",
+            effects: `add(aff_mirror,1);set(flag_${chapterId}_hold,1);set(flag_side_${chapterId},1)`,
+            jumpToNodeId: qteNode,
+          });
+          addChoice({
+            choiceId: `${chapterId}_D`,
+            nodeId: `${chapterId}_c0`,
+            text: "回头看一眼（夜晚限定）",
+            condition: 'flag("time_night") && philo>=3',
+            effects: `set(flag_${chapterId}_back,1);add(philo,1);bubble("你看见自己站在更远的地方")`,
+            jumpToNodeId: qteNode,
+          });
+        }
+
+        cfg.chapters.push({ chapterId: "side_time", title: "支线·时间轴", entryNodeId: "side_time_n0", unlockCondition: "flag(\"side_act3\") && flag(\"time_night\")" });
+        addNode({
+          nodeId: "side_time_n0",
+          chapterId: "side_time",
+          type: "dialog",
+          speaker: "猫",
+          charId: "cat",
+          bgKey: "bar",
+          bgmKey: "A",
+          text: "夜晚限定支线：\\n你终于把那句半价留言写完整了。\\n写完的那一刻，抽屉里回了你一声很轻的“嗯”。",
+          effectsOnEnter: "add(aff_cat,2);set(flag_side_time_done,1);bubble(\"别把温柔当作软弱\")",
+          next: "side_time_end",
+          rollbackable: 1,
+        });
+        addNode({ nodeId: "side_time_end", chapterId: "side_time", type: "ending", text: "结局：夜晚限定", effectsOnEnter: "set(flag_side_time_end,1)", rollbackable: 0 });
+        return cfg;
       }
       function vn2GetCache() {
         const cfg = vn2GetConfig();
@@ -3618,14 +5497,40 @@
         return vn2Cache;
       }
       function vn2Flag(name) {
+        const n0 = String(name || "");
+        if (n0.startsWith("time_")) {
+          const part = vn2DayPart();
+          return n0 === `time_${part}`;
+        }
         const v2 = state.vn2;
         const rt = v2.runtime;
         const v = rt && rt.vars ? rt.vars : {};
         return !!(v[`flag_${name}`] || (v2.meta && v2.meta.flags && v2.meta.flags[name]));
       }
+      function vn2DayPart() {
+        const h = new Date().getHours();
+        if (h >= 5 && h < 12) return "morning";
+        if (h >= 12 && h < 18) return "afternoon";
+        return "night";
+      }
+      function vn2SetMetaFlag(name, val) {
+        state.vn2.meta = state.vn2.meta || { affinity: { cat: 0, mirror: 0, classmate: 0, director: 0 }, flags: {}, ngPlus: 0, philo: 0, easter: {} };
+        state.vn2.meta.flags = state.vn2.meta.flags || {};
+        state.vn2.meta.flags[name] = val ? 1 : 0;
+        const rt = state.vn2.runtime;
+        if (rt) {
+          rt.vars = rt.vars || {};
+          rt.vars[`flag_${name}`] = val ? 1 : 0;
+        }
+      }
       function vn2VarNum(name) {
         const rt = state.vn2.runtime;
         const v = rt && rt.vars ? rt.vars : {};
+        if (name === "philo" && (!rt || v.philo === undefined)) {
+          const m = state.vn2 && state.vn2.meta ? state.vn2.meta : null;
+          const n0 = m && typeof m.philo === "number" ? m.philo : 0;
+          return Number.isFinite(n0) ? n0 : 0;
+        }
         const n = typeof v[name] === "number" ? v[name] : typeof v[name] === "string" ? parseFloat(v[name]) : 0;
         return Number.isFinite(n) ? n : 0;
       }
@@ -3646,7 +5551,11 @@
             }
             let v = false;
             const mFlag = s.match(/^flag\(\s*"([^"]+)"\s*\)$/);
-            if (mFlag) v = vn2Flag(mFlag[1]);
+            if (mFlag) {
+              let fn = mFlag[1];
+              if (fn.startsWith("flag_")) fn = fn.slice(5);
+              v = vn2Flag(fn);
+            }
             else {
               const mCmp = s.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\s*(==|!=|>=|<=|>|<)\s*(-?\d+(?:\.\d+)?)$/);
               if (mCmp) {
@@ -3679,6 +5588,32 @@
         v2.meta.flags = v2.meta.flags || {};
         v2.meta.easter = v2.meta.easter || {};
         v2.meta.affinity = v2.meta.affinity || { cat: 0, mirror: 0, classmate: 0, director: 0 };
+        const mShake = s.match(/^shake\(\s*(-?\d+(?:\.\d+)?)\s*\)$/);
+        const mFlash = s.match(/^flash\(\s*(-?\d+(?:\.\d+)?)\s*\)$/);
+        const mBubble = s.match(/^bubble\(\s*([^\)]+)\s*\)$/);
+        if (mShake) {
+          const p = clamp(parseFloat(mShake[1]), 0, 2);
+          rt.shakePow = Math.max(rt.shakePow || 0, p);
+          rt.shakeAt = now();
+          audioSfx(p >= 1.2 ? "important" : "ui");
+          if (navigator.vibrate) navigator.vibrate(p >= 1.2 ? 22 : 10);
+          return;
+        }
+        if (mFlash) {
+          const p = clamp(parseFloat(mFlash[1]), 0, 1);
+          rt.flashPow = Math.max(rt.flashPow || 0, p);
+          rt.flashAt = now();
+          audioSfx(p >= 0.55 ? "shutter" : "click");
+          return;
+        }
+        if (mBubble) {
+          let raw = String(mBubble[1]).trim();
+          if ((raw.startsWith("\"") && raw.endsWith("\"")) || (raw.startsWith("'") && raw.endsWith("'"))) raw = raw.slice(1, -1);
+          rt.bubbleText = raw;
+          rt.bubbleAt = now();
+          audioSfx("whisper");
+          return;
+        }
         const mSet = s.match(/^set\(\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*,\s*([^\)]+)\s*\)$/);
         const mAdd = s.match(/^add\(\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*,\s*(-?\d+(?:\.\d+)?)\s*\)$/);
         if (mSet) {
@@ -3702,6 +5637,7 @@
             v2.meta.affinity[who] += d;
           } else if (key === "philo") {
             v2.meta.philo = (v2.meta.philo || 0) + d;
+            rt.vars.philo = v2.meta.philo;
           } else {
             const cur = vn2VarNum(key);
             rt.vars[key] = cur + d;
@@ -3744,6 +5680,13 @@
           nextAutoAt: 0,
           fxSeed: hash32(String(now()) + "|vn2|"),
           fx: [],
+          shakeAt: 0,
+          shakePow: 0,
+          flashAt: 0,
+          flashPow: 0,
+          bubbleText: "",
+          bubbleAt: 0,
+          qte: null,
         };
       }
       function vn2PushRollback(rt) {
@@ -3808,11 +5751,12 @@
         rt.bgKey = n.bgKey || rt.bgKey || "desk_rain";
         rt.bgFadeT = 0;
         rt.charId = n.charId || rt.charId || "mirror";
-        rt.charEmotion = rt.charEmotion || "calm";
+        rt.charEmotion = n.charEmotion || n.emotion || rt.charEmotion || "calm";
         rt.charInT = 0;
         rt.lineChar = n.speaker || "";
         rt.lineEmotion = "calm";
-        rt.lineText = String(n.text || "");
+        rt.qte = null;
+        rt.lineText = vn2RenderText(String(n.text || ""));
         rt.shown = 0;
         rt.done = false;
         rt.options = null;
@@ -3827,6 +5771,14 @@
         if (n.sfxKey) audioSfx(n.sfxKey);
         if (n.bgmKey) audioBgm(n.bgmKey);
         if (n.effectsOnEnter) vn2ApplyEffects(n.effectsOnEnter);
+        if (n.type === "qte") {
+          rt.qte = { t0: now(), ms: clamp(n.qteMs || 800, 200, 800), successNext: n.successNext, failNext: n.failNext, done: false };
+          rt.done = true;
+          vnPrimeFx(rt);
+          saveState();
+          vn2Autosave();
+          return;
+        }
         if (n.type === "choice") {
           const list = cache.choicesByNode[n.nodeId] || [];
           const out = [];
@@ -3862,6 +5814,21 @@
         vnPrimeFx(rt);
         saveState();
         vn2Autosave();
+      }
+
+      function vn2RenderText(text) {
+        let s = String(text || "");
+        const dp = vn2DayPart();
+        const dpZh = dp === "morning" ? "清晨" : dp === "afternoon" ? "下午" : "夜晚";
+        s = s.replace(/\{\{dp\}\}/g, dpZh);
+        s = s.replace(/\{\{fracture\}\}/g, String(state.mirrorFracture));
+        s = s.replace(/\{\{mood\}\}/g, String(Math.round(state.settings.mood || 0)));
+        s = s.replace(/\{\{if:([a-zA-Z0-9_]+)\?([^|}]*)\|([^}]*)\}\}/g, (_m, flagName, a, b) => {
+          let fn = String(flagName || "");
+          if (fn.startsWith("flag_")) fn = fn.slice(5);
+          return vn2Flag(fn) ? String(a) : String(b);
+        });
+        return s;
       }
       function vn2StartChapter(chapterId) {
         const cache = vn2GetCache();
@@ -3917,9 +5884,31 @@
         }
         rt.options = null;
         if (opt.effects) vn2ApplyEffects(opt.effects);
+        state.vn2.meta = state.vn2.meta || { affinity: { cat: 0, mirror: 0, classmate: 0, director: 0 }, flags: {}, ngPlus: 0, philo: 0, easter: {} };
+        state.vn2.meta.lastChoice = opt.choiceId;
+        track("vn_choice", { choiceId: opt.choiceId, nodeId: (state.vn2.runtime && state.vn2.runtime.nodeId) || "" });
         addRipple(ui.mx, ui.my, "rgba(124,92,255,0.22)");
         audioSfx("stamp");
         vn2EnterNode(opt.jumpToNodeId, true);
+      }
+
+      function vn2ResolveQte(rt, ok) {
+        if (!rt || !rt.qte || rt.qte.done) return;
+        rt.qte.done = true;
+        const next = ok ? rt.qte.successNext : rt.qte.failNext;
+        rt.qte = null;
+        audioSfx(ok ? "stamp" : "click");
+        if (navigator.vibrate) navigator.vibrate(ok ? [10, 20, 10] : 24);
+        track(ok ? "vn_qte_ok" : "vn_qte_fail", { nodeId: rt.nodeId || "" });
+        if (next) vn2EnterNode(next, true);
+        else {
+          state.flow.scene = "vn2Home";
+          saveState();
+        }
+      }
+      function vn2UpdateQte(rt) {
+        if (!rt || !rt.qte || rt.qte.done) return;
+        if (now() - rt.qte.t0 > rt.qte.ms) vn2ResolveQte(rt, false);
       }
       function vn2Autosave() {
         const v2 = state.vn2;
@@ -4295,12 +6284,18 @@
           rrPath(x, y, innerW, 66, 16);
           ctx.fillStyle = on ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.18)";
           ctx.fill();
-          ctx.strokeStyle = on ? "rgba(34,211,238,0.35)" : "rgba(255,255,255,0.10)";
+          const tier = a.tier || "bronze";
+          const tierC = tier === "platinum" ? "rgba(255,214,170,0.55)" : tier === "gold" ? "rgba(250,204,21,0.50)" : tier === "silver" ? "rgba(200,240,255,0.40)" : "rgba(255,255,255,0.18)";
+          ctx.strokeStyle = on ? tierC : "rgba(255,255,255,0.10)";
           ctx.stroke();
           drawAchIcon(a.id, x + 16, y + 12, 42, on);
           ctx.fillStyle = on ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.62)";
           ctx.font = `800 13px ${fontSans}`;
           ctx.fillText(on ? a.name : "???", x + 70, y + 28);
+          ctx.fillStyle = "rgba(255,255,255,0.52)";
+          ctx.font = `12px ${fontSans}`;
+          const tzh = tier === "platinum" ? "铂" : tier === "gold" ? "金" : tier === "silver" ? "银" : "铜";
+          ctx.fillText(tzh, x + innerW - 24, y + 28);
           ctx.fillStyle = "rgba(255,255,255,0.56)";
           ctx.font = `12px ${fontSans}`;
           ctx.fillText(on ? a.desc : "未解锁", x + 70, y + 48);
@@ -4605,9 +6600,12 @@
         ctx.font = `12px ${fontSans}`;
         const leftMs = clamp(run.turnLimitMs - (now() - run.turnStartAt), 0, run.turnLimitMs);
         ctx.fillText(`倒计时 ${Math.ceil(leftMs / 1000)}s  逆风充能 ${state.stats.headwindCharge}  里程 ${state.stats.mileage}  燃料 ${state.stats.fuel}`, pad + 14, top + 44);
+        if (leftMs <= 0 && cur.phase === "mode") {
+          finishTurnMode(cur, false);
+        }
         if (leftMs <= 0 && cur.phase === "input") {
           cur.input = cur.input || "";
-          cur.turn = buildTurn(moduleId, cur.input, { sugar: cur.sugar, bMode: cur.bMode });
+          cur.turn = buildTurn(moduleId, cur.input, { sugar: cur.sugar, bMode: cur.bMode, leaveText: cur.leaveText });
           run.current.phase = "story";
           cur.vnLines = null;
           cur.vnCursor = 0;
@@ -4615,7 +6613,9 @@
           if (cur.turn.voice) speak(cur.turn.voice);
         }
 
-        if (cur.phase === "input") {
+        if (cur.phase === "mode") {
+          drawTurnMode(cur, pad, top, w, h);
+        } else if (cur.phase === "input") {
           drawTurnInput(cur, pad, top, w, h);
         } else if (cur.phase === "story") {
           if (state.flow.mode === "vn") drawTurnStoryVN(cur, pad, top, w, h);
@@ -4623,6 +6623,570 @@
         } else if (cur.phase === "result") {
           drawTurnResult(cur, pad, top, w, h);
         }
+      }
+
+      function initTurnMode(cur) {
+        const t = now();
+        const part = vn2DayPart();
+        state.stats.modeTutorSeen = state.stats.modeTutorSeen || { A: 0, B: 0, C: 0 };
+        state.stats.modeLast = state.stats.modeLast || { A: { best: 0, calm: 0, tol: 0.12, ts: 0 }, B: { len: 0, sealed: 0, ts: 0 }, C: { hit: 0, lane: 1, drift: 0, ts: 0 } };
+        if (cur.moduleId === "A") {
+          cur.mode = "pulse";
+          const last = state.stats.modeLast.A || { best: 0, tol: 0.12 };
+          const baseTol = last.best <= 2 ? 0.16 : last.best >= 8 ? 0.10 : clamp(last.tol || 0.12, 0.08, 0.20);
+          const variants = [
+            { id: "metro", name: "地铁呼吸", bpm: part === "morning" ? 78 : 84, tol: baseTol },
+            { id: "deadline", name: "DDL倒计时", bpm: part === "night" ? 92 : 88, tol: clamp(baseTol - 0.01, 0.08, 0.20) },
+            { id: "quiet", name: "静音模式", bpm: 72, tol: clamp(baseTol + 0.02, 0.10, 0.22) },
+          ];
+          const v = variants[hash32(String(t) + "|A|" + String(state.mirrorFracture)) % variants.length];
+          cur.modeState = {
+            t0: t,
+            startedAt: 0,
+            durMs: 22000,
+            bpm: v.bpm,
+            variant: v,
+            phase: 0,
+            tol: v.tol,
+            streak: 0,
+            best: 0,
+            calm: 0,
+            breathHoldUntil: 0,
+            didTutorial: 0,
+          };
+          track("mode_start", { module: "A", mode: "pulse", v: v.id });
+        } else if (cur.moduleId === "B") {
+          cur.mode = "cutup";
+          const seed = hash32(String(t) + "|cutup|" + String(state.mirrorFracture) + "|" + part);
+          const r = mulberry32(seed);
+          const pool0 =
+            part === "night"
+              ? ["我", "不", "想", "再", "装", "没事", "算了", "其实", "好累", "撤回", "已读", "未读", "别回头", "允许", "失眠", "边界", "电量", "抱歉", "别问", "算了吧"]
+              : ["我", "想", "说", "清楚", "不是", "你的", "错", "谢谢", "对不起", "再见", "不打扰", "允许", "边界", "尊重", "今天", "明天", "慢一点", "就这样", "撤回", "被看见"];
+          const theme = getWeekTheme(now()).key || "";
+          const pool = pool0.concat(theme ? [theme] : []);
+          const words = [];
+          for (let i = 0; i < 10; i++) words.push(pool[(r() * pool.length) | 0]);
+          cur.modeState = { t0: t, startedAt: 0, durMs: 26000, seed, words, picked: [], invert: {}, sealed: 0, didTutorial: 0 };
+          track("mode_start", { module: "B", mode: "cutup", part });
+        } else {
+          cur.mode = "lane";
+          const last = state.stats.modeLast.C || { hit: 0 };
+          const baseSpeed = last.hit >= 2 ? 0.016 : last.hit === 0 ? 0.020 : 0.018;
+          cur.modeState = { t0: t, startedAt: 0, durMs: 24000, lane: 1, pos: 0, speed: baseSpeed, hit: 0, focusSpend: 0, didTutorial: 0, variant: part };
+          track("mode_start", { module: "C", mode: "lane", part });
+        }
+      }
+
+      function finishTurnMode(cur, ok) {
+        const ms = cur.modeState || {};
+        if (!ms || ms.done) return;
+        ms.done = 1;
+        const moduleId = cur.moduleId;
+        const run = state.flow.run;
+        run.res = run.res || { ink: 2, heat: 0, focus: 2 };
+        state.stats.modeLast = state.stats.modeLast || { A: { best: 0, calm: 0, tol: 0.12, ts: 0 }, B: { len: 0, sealed: 0, ts: 0 }, C: { hit: 0, lane: 1, drift: 0, ts: 0 } };
+        if (moduleId === "A") {
+          const s = ms.streak || 0;
+          const calm = ms.calm || 0;
+          cur.sugar = s >= 6 ? "五分糖" : s >= 3 ? "三分糖" : "无糖";
+          cur.input = s >= 6 ? "我还在呼吸" : s >= 3 ? "我可以慢一点" : "我需要停一下";
+          cur.leaveText = cur.input;
+          state.shards.sugar += calm >= 3 ? 2 : 1;
+          run.res.heat = clamp((run.res.heat || 0) + (ok ? 1 : 0), 0, 6);
+          state.stats.modeLast.A = { best: Math.max(ms.best || 0, s), calm, tol: ms.tol || 0.12, ts: now() };
+          track(ok ? "mode_end" : "mode_fail", { module: "A", streak: s, calm, durMs: now() - ms.t0 });
+        } else if (moduleId === "B") {
+          const picked = (ms.picked || []).slice(0, 5);
+          const parts = [];
+          for (let i = 0; i < picked.length; i++) {
+            const w = picked[i];
+            const inv = ms.invert && ms.invert[i] ? "不" : "";
+            parts.push(inv + w);
+          }
+          const line = parts.join("").slice(0, 10) || "我没说出口";
+          cur.bMode = "edit5";
+          cur.input = line;
+          state.shards.hongdou += ok ? 2 : 1;
+          run.res.ink = clamp((run.res.ink || 0) + (ok ? 1 : 0), 0, 6);
+          state.stats.modeLast.B = { len: line.length, sealed: ms.sealed ? 1 : 0, ts: now() };
+          track(ok ? "mode_end" : "mode_fail", { module: "B", len: line.length, durMs: now() - ms.t0 });
+        } else {
+          const lane = ms.lane || 1;
+          const hit = ms.hit || 0;
+          const s = hit === 0 ? "我决定不回头" : hit <= 1 ? "我还在路上" : "我需要帮助";
+          cur.input = s;
+          state.shards.hoofprint += hit === 0 && ok ? 2 : 1;
+          run.res.focus = clamp((run.res.focus || 0) + (hit === 0 ? 1 : 0), 0, 6);
+          state.stats.modeLast.C = { hit, lane, drift: ms.focusSpend || 0, ts: now() };
+          track(ok ? "mode_end" : "mode_fail", { module: "C", lane, hit, durMs: now() - ms.t0 });
+        }
+
+        cur.turn = buildTurn(moduleId, cur.input, { sugar: cur.sugar, bMode: cur.bMode, leaveText: cur.leaveText });
+        cur.phase = "story";
+        cur.vnLines = null;
+        cur.vnCursor = 0;
+        saveState();
+        if (cur.turn && cur.turn.voice) speak(cur.turn.voice);
+      }
+
+      function drawTurnMode(cur, pad, top, w, h) {
+        if (!cur.modeState) initTurnMode(cur);
+        const ms = cur.modeState;
+        const x = pad + 14;
+        const y = top + 60;
+        const innerW = w - 28;
+        const innerH = h - 140;
+        rrPath(x, y, innerW, innerH, 16);
+        ctx.fillStyle = "rgba(0,0,0,0.12)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.10)";
+        ctx.stroke();
+
+        if (cur.moduleId === "A") drawModePulse(cur, x, y, innerW, innerH);
+        else if (cur.moduleId === "B") drawModeCutup(cur, x, y, innerW, innerH);
+        else drawModeLane(cur, x, y, innerW, innerH);
+
+        btn("modeSkip", x, top + h - 74, innerW, 56, "跳过玩法（直接进入剧情）", "ghost", () => finishTurnMode(cur, false));
+      }
+
+      function drawModePulse(cur, x, y, w, h) {
+        const ms = cur.modeState;
+        const t = now();
+        if (!ms.startedAt) {
+          const cardW = Math.min(w - 28, 520);
+          const cardH = 240;
+          const cx = x + (w - cardW) / 2;
+          const cy = y + (h - cardH) / 2;
+          rrPath(x, y, w, h, 16);
+          ctx.fillStyle = "rgba(0,0,0,0.40)";
+          ctx.fill();
+          rrPath(cx, cy, cardW, cardH, 18);
+          ctx.fillStyle = "rgba(0,0,0,0.52)";
+          ctx.fill();
+          ctx.strokeStyle = "rgba(255,255,255,0.14)";
+          ctx.stroke();
+          ctx.fillStyle = "rgba(255,255,255,0.92)";
+          ctx.font = `900 ${Math.round(16 * uiScale)}px ${fontSans}`;
+          ctx.fillText(`A｜呼吸校准 · ${ms.variant && ms.variant.name ? ms.variant.name : ""}`, cx + 14, cy + 32);
+          ctx.fillStyle = "rgba(255,255,255,0.72)";
+          ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+          wrapText("点击跟上脉冲获得连击。\n左右滑动调整容错（更易/更难）。\n长按屏息1秒，给自己一点空隙。", cx + 14, cy + 62, cardW - 28, Math.round(18 * uiScale), "rgba(255,255,255,0.72)");
+          btn("pulseStart", cx + 14, cy + cardH - 70, cardW - 28, 56, "开始", "primary", () => {
+            ms.startedAt = now();
+            ms.t0 = ms.startedAt;
+            state.stats.modeTutorSeen.A = 1;
+            saveState();
+          });
+          return;
+        }
+        const pAll = clamp((t - ms.startedAt) / ms.durMs, 0, 1);
+        if (pAll >= 1) {
+          finishTurnMode(cur, true);
+          return;
+        }
+        rrPath(x, y, w, h, 16);
+        ctx.save();
+        ctx.clip();
+        const bgKey = "corridor";
+        drawDrawerBg({ bgKey, bgFrom: bgKey, bgT0: t }, x - 14, y - 60, w + 28, h + 140);
+        drawHorrorFX(0.18 + state.mirrorFracture * 0.02, "pulse|" + String(ms.startedAt));
+        ctx.restore();
+
+        const cx = x + w * 0.5;
+        const cy = y + h * 0.52;
+        const r = Math.min(w, h) * 0.22;
+        const beat = 60 / clamp(ms.bpm || 84, 56, 120);
+        const tt = ms.breathHoldUntil && t < ms.breathHoldUntil ? ms.holdPhaseAt || ms.phaseAt || 0 : (t - ms.startedAt) / 1000;
+        const ph = (tt / beat) % 1;
+        ms.phaseAt = ph;
+        const ring = 0.55 + 0.45 * Math.sin(ph * Math.PI * 2);
+        const glow = 0.10 + 0.22 * Math.max(0, ring);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, r * (0.92 + 0.06 * ring), 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.22)";
+        ctx.fill();
+        ctx.strokeStyle = `rgba(255,255,255,${0.14 + glow})`;
+        ctx.lineWidth = Math.max(2, Math.round(4 * uiScale));
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx, cy, r * (1.18 + 0.10 * ring), 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(250,204,21,${0.08 + glow * 0.8})`;
+        ctx.lineWidth = Math.max(2, Math.round(3 * uiScale));
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.fillStyle = "rgba(255,255,255,0.90)";
+        ctx.font = `900 ${Math.round(16 * uiScale)}px ${fontSans}`;
+        ctx.fillText("呼吸校准", x + 14, y + 28);
+        ctx.fillStyle = "rgba(255,255,255,0.70)";
+        ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+        ctx.fillText("点击跟上脉冲；左右滑动调整“容错”；长按屏息1秒", x + 14, y + 52);
+        ctx.fillStyle = "rgba(255,255,255,0.62)";
+        ctx.fillText(`连击 ${ms.streak || 0}  最佳 ${ms.best || 0}  容错 ${(ms.tol * 100) | 0}%`, x + 14, y + 76);
+
+        const left = Math.max(0, ms.durMs - (t - ms.t0));
+        ctx.fillStyle = "rgba(255,255,255,0.62)";
+        ctx.fillText(`剩余 ${(left / 1000).toFixed(0)}s`, x + w - 92, y + 28);
+
+        hot2(
+          "modeA_area",
+          x,
+          y,
+          w,
+          h,
+          "whisper",
+          "light",
+          () => {
+            const dx = ui.mx - ui.downX;
+            if (ui.moved && Math.abs(dx) > 60) {
+              ms.tol = clamp(ms.tol + (dx > 0 ? 0.02 : -0.02), 0.06, 0.22);
+              track("mode_action", { module: "A", a: "tol", tol: ms.tol });
+              saveState();
+              return;
+            }
+            const dist = Math.min(ph, 1 - ph);
+            const ok = dist <= ms.tol;
+            if (ok) {
+              ms.streak = (ms.streak || 0) + 1;
+              ms.best = Math.max(ms.best || 0, ms.streak);
+              ms.calm = (ms.calm || 0) + 1;
+              addRipple(ui.mx, ui.my, "rgba(250,204,21,0.18)");
+              track("mode_action", { module: "A", a: "tap_ok", streak: ms.streak });
+            } else {
+              ms.streak = 0;
+              addRipple(ui.mx, ui.my, "rgba(255,77,109,0.16)");
+              track("mode_action", { module: "A", a: "tap_miss" });
+            }
+            saveState();
+          },
+          () => {
+            ms.breathHoldUntil = now() + 1100;
+            ms.holdPhaseAt = ms.phaseAt || 0;
+            ms.calm = (ms.calm || 0) + 1;
+            track("mode_action", { module: "A", a: "hold" });
+            saveState();
+          }
+        );
+      }
+
+      function drawModeCutup(cur, x, y, w, h) {
+        const ms = cur.modeState;
+        const t = now();
+        if (!ms.startedAt) {
+          const cardW = Math.min(w - 28, 520);
+          const cardH = 240;
+          const cx = x + (w - cardW) / 2;
+          const cy = y + (h - cardH) / 2;
+          rrPath(x, y, w, h, 16);
+          ctx.fillStyle = "rgba(0,0,0,0.40)";
+          ctx.fill();
+          rrPath(cx, cy, cardW, cardH, 18);
+          ctx.fillStyle = "rgba(0,0,0,0.52)";
+          ctx.fill();
+          ctx.strokeStyle = "rgba(255,255,255,0.14)";
+          ctx.stroke();
+          ctx.fillStyle = "rgba(255,255,255,0.92)";
+          ctx.font = `900 ${Math.round(16 * uiScale)}px ${fontSans}`;
+          ctx.fillText("B｜剪贴室", cx + 14, cy + 32);
+          ctx.fillStyle = "rgba(255,255,255,0.72)";
+          ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+          wrapText("点词片拼一句（3~5词）。\n点槽位可移除词。\n长按槽位可在词前加“不”。\n封蜡提交后进入剧情。", cx + 14, cy + 62, cardW - 28, Math.round(18 * uiScale), "rgba(255,255,255,0.72)");
+          btn("cutupStart", cx + 14, cy + cardH - 70, cardW - 28, 56, "开始", "primary", () => {
+            ms.startedAt = now();
+            ms.t0 = ms.startedAt;
+            state.stats.modeTutorSeen.B = 1;
+            saveState();
+          });
+          return;
+        }
+        const pAll = clamp((t - ms.startedAt) / ms.durMs, 0, 1);
+        if (pAll >= 1) {
+          finishTurnMode(cur, (ms.picked || []).length >= 3);
+          return;
+        }
+
+        rrPath(x, y, w, h, 16);
+        ctx.save();
+        ctx.clip();
+        const bgKey = "letter";
+        drawDrawerBg({ bgKey, bgFrom: bgKey, bgT0: t }, x - 14, y - 60, w + 28, h + 140);
+        drawHorrorFX(0.10 + state.mirrorFracture * 0.02, "cutup|" + String(ms.startedAt || ms.seed || 0));
+        ctx.restore();
+
+        ctx.fillStyle = "rgba(255,255,255,0.90)";
+        ctx.font = `900 ${Math.round(16 * uiScale)}px ${fontSans}`;
+        ctx.fillText("剪贴室", x + 14, y + 28);
+        ctx.fillStyle = "rgba(255,255,255,0.70)";
+        ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+        ctx.fillText("点词片拼一句；长按槽位加“不”；封蜡后进入剧情", x + 14, y + 52);
+
+        const lineY = y + 74;
+        rrPath(x + 14, lineY, w - 28, 64, 16);
+        ctx.fillStyle = "rgba(0,0,0,0.22)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.12)";
+        ctx.stroke();
+
+        const slots = 5;
+        const gap = 10;
+        const sw = (w - 28 - (slots + 1) * gap) / slots;
+        for (let i = 0; i < slots; i++) {
+          const sx = x + 14 + gap + i * (sw + gap);
+          const sy = lineY + 14;
+          rrPath(sx, sy, sw, 36, 12);
+          ctx.fillStyle = "rgba(255,255,255,0.06)";
+          ctx.fill();
+          ctx.strokeStyle = "rgba(255,255,255,0.10)";
+          ctx.stroke();
+          const w0 = (ms.picked || [])[i];
+          const inv = ms.invert && ms.invert[i] ? "不" : "";
+          if (w0) {
+            ctx.fillStyle = "rgba(255,255,255,0.88)";
+            ctx.font = `800 ${Math.round(14 * uiScale)}px ${fontSans}`;
+            const txt = inv + w0;
+            const tw = ctx.measureText(txt).width;
+            ctx.fillText(txt, sx + (sw - tw) / 2, sy + 24);
+          }
+          hot2(
+            `cutSlot_${i}`,
+            sx,
+            sy,
+            sw,
+            36,
+            "whisper",
+            "light",
+            () => {
+              if ((ms.picked || []).length > i) {
+                ms.picked.splice(i, 1);
+                delete ms.invert[i];
+                track("mode_action", { module: "B", a: "remove", idx: i });
+                saveState();
+              }
+            },
+            () => {
+              ms.invert = ms.invert || {};
+              ms.invert[i] = ms.invert[i] ? 0 : 1;
+              track("mode_action", { module: "B", a: "invert", idx: i, v: ms.invert[i] ? 1 : 0 });
+              saveState();
+            }
+          );
+        }
+
+        const listY = lineY + 84;
+        const cols = 2;
+        const bw = (w - 28 - 14) / cols;
+        const bh = 46;
+        for (let i = 0; i < (ms.words || []).length; i++) {
+          const wx = x + 14 + (i % cols) * (bw + 14);
+          const wy = listY + Math.floor(i / cols) * (bh + 10);
+          rrPath(wx, wy, bw, bh, 14);
+          ctx.fillStyle = "rgba(255,255,255,0.06)";
+          ctx.fill();
+          ctx.strokeStyle = "rgba(255,255,255,0.10)";
+          ctx.stroke();
+          ctx.fillStyle = "rgba(255,255,255,0.88)";
+          ctx.font = `800 ${Math.round(14 * uiScale)}px ${fontSans}`;
+          const txt = ms.words[i];
+          const tw = ctx.measureText(txt).width;
+          ctx.fillText(txt, wx + (bw - tw) / 2, wy + 30);
+          hot2(
+            `cutWord_${i}`,
+            wx,
+            wy,
+            bw,
+            bh,
+            "ui",
+            "light",
+            () => {
+              ms.picked = ms.picked || [];
+              if (ms.picked.length >= 5) return;
+              ms.picked.push(ms.words[i]);
+              track("mode_action", { module: "B", a: "pick", w: ms.words[i], n: ms.picked.length });
+              saveState();
+            },
+            null
+          );
+        }
+
+        btn("cutUndo", x + 14, y + h - 62, (w - 28 - 14) / 2, 48, "撤回", "ghost", () => {
+          ms.picked = ms.picked || [];
+          if (ms.picked.length) ms.picked.pop();
+          track("mode_action", { module: "B", a: "undo" });
+          saveState();
+        });
+        btn("cutSeal", x + 28 + (w - 28 - 14) / 2, y + h - 62, (w - 28 - 14) / 2, 48, "封蜡", "primary", () => {
+          if ((ms.picked || []).length < 3) return toast("至少拼 3 个词");
+          ms.sealed = 1;
+          track("mode_action", { module: "B", a: "seal" });
+          finishTurnMode(cur, true);
+        });
+      }
+
+      function drawModeLane(cur, x, y, w, h) {
+        const ms = cur.modeState;
+        const t = now();
+        if (!ms.startedAt) {
+          const cardW = Math.min(w - 28, 520);
+          const cardH = 240;
+          const cx = x + (w - cardW) / 2;
+          const cy = y + (h - cardH) / 2;
+          rrPath(x, y, w, h, 16);
+          ctx.fillStyle = "rgba(0,0,0,0.40)";
+          ctx.fill();
+          rrPath(cx, cy, cardW, cardH, 18);
+          ctx.fillStyle = "rgba(0,0,0,0.52)";
+          ctx.fill();
+          ctx.strokeStyle = "rgba(255,255,255,0.14)";
+          ctx.stroke();
+          ctx.fillStyle = "rgba(255,255,255,0.92)";
+          ctx.font = `900 ${Math.round(16 * uiScale)}px ${fontSans}`;
+          ctx.fillText("C｜逆风走廊", cx + 14, cy + 32);
+          ctx.fillStyle = "rgba(255,255,255,0.72)";
+          ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+          wrapText("左右滑动换道躲障碍。\n漂移：消耗专注获得短暂无敌。\n长按刹车：降低速度，但奖励更少倾向。", cx + 14, cy + 62, cardW - 28, Math.round(18 * uiScale), "rgba(255,255,255,0.72)");
+          btn("laneStart", cx + 14, cy + cardH - 70, cardW - 28, 56, "开始", "primary", () => {
+            ms.startedAt = now();
+            ms.t0 = ms.startedAt;
+            ms.lastAt = ms.startedAt;
+            ms.pos = 0;
+            ms.obs = null;
+            state.stats.modeTutorSeen.C = 1;
+            saveState();
+          });
+          return;
+        }
+        if (!ms.lastAt) ms.lastAt = t;
+        const dt = clamp((t - ms.lastAt) / 1000, 0, 0.05);
+        ms.lastAt = t;
+        const pAll = clamp((t - ms.startedAt) / ms.durMs, 0, 1);
+        if (pAll >= 1) {
+          finishTurnMode(cur, (ms.hit || 0) <= 1);
+          return;
+        }
+
+        rrPath(x, y, w, h, 16);
+        ctx.save();
+        ctx.clip();
+        const bgKey = "corridor";
+        drawDrawerBg({ bgKey, bgFrom: bgKey, bgT0: t }, x - 14, y - 60, w + 28, h + 140);
+        drawHorrorFX(0.16 + state.mirrorFracture * 0.02, "lane|" + String(ms.startedAt));
+        ctx.restore();
+
+        ms.pos = (ms.pos || 0) + dt * (ms.speed || 0.018);
+        if (!ms.obs) {
+          const seed = hash32(String(ms.startedAt) + "|lane|" + String(state.mirrorFracture));
+          const r = mulberry32(seed);
+          ms.obs = [];
+          for (let i = 0; i < 7; i++) ms.obs.push({ at: 0.12 + i * 0.12 + r() * 0.04, lane: (r() * 3) | 0, hit: 0 });
+        }
+
+        ctx.fillStyle = "rgba(255,255,255,0.90)";
+        ctx.font = `900 ${Math.round(16 * uiScale)}px ${fontSans}`;
+        ctx.fillText("逆风走廊", x + 14, y + 28);
+        ctx.fillStyle = "rgba(255,255,255,0.70)";
+        ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+        ctx.fillText("左右滑动换道；点“漂移”消耗专注免伤一次；长按刹车", x + 14, y + 52);
+
+        const trackX = x + 14;
+        const trackY = y + 74;
+        const trackW = w - 28;
+        const trackH = h - 150;
+        rrPath(trackX, trackY, trackW, trackH, 18);
+        ctx.fillStyle = "rgba(0,0,0,0.18)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.10)";
+        ctx.stroke();
+
+        const lanes = 3;
+        for (let i = 1; i < lanes; i++) {
+          const lx = trackX + (trackW * i) / lanes;
+          ctx.strokeStyle = "rgba(255,255,255,0.10)";
+          ctx.beginPath();
+          ctx.moveTo(lx, trackY + 10);
+          ctx.lineTo(lx, trackY + trackH - 10);
+          ctx.stroke();
+        }
+
+        const inv = ms.invUntil && t < ms.invUntil;
+        for (let i = 0; i < ms.obs.length; i++) {
+          const o = ms.obs[i];
+          const dy = (o.at - ms.pos) * trackH * 2.6;
+          const oy = trackY + trackH - 30 - dy;
+          if (oy < trackY - 40) continue;
+          const lane = o.lane;
+          const ox = trackX + (lane + 0.5) * (trackW / lanes);
+          rrPath(ox - 18, oy - 12, 36, 24, 10);
+          ctx.fillStyle = o.hit ? "rgba(255,255,255,0.08)" : "rgba(255,77,109,0.24)";
+          ctx.fill();
+          ctx.strokeStyle = o.hit ? "rgba(255,255,255,0.10)" : "rgba(255,77,109,0.28)";
+          ctx.stroke();
+        }
+
+        const px = trackX + (ms.lane + 0.5) * (trackW / lanes);
+        const py = trackY + trackH - 56;
+        ctx.beginPath();
+        ctx.arc(px, py, 16, 0, Math.PI * 2);
+        ctx.fillStyle = inv ? "rgba(34,211,238,0.32)" : "rgba(250,204,21,0.20)";
+        ctx.fill();
+        ctx.strokeStyle = inv ? "rgba(34,211,238,0.55)" : "rgba(250,204,21,0.48)";
+        ctx.lineWidth = Math.max(2, Math.round(3 * uiScale));
+        ctx.stroke();
+
+        for (let i = 0; i < ms.obs.length; i++) {
+          const o = ms.obs[i];
+          if (o.hit) continue;
+          if (Math.abs(o.at - ms.pos) < 0.02 && o.lane === ms.lane) {
+            if (!inv) {
+              o.hit = 1;
+              ms.hit = (ms.hit || 0) + 1;
+              ms.invUntil = t + 400;
+              track("mode_action", { module: "C", a: "hit", n: ms.hit });
+              audioSfx("important");
+              haptic("heavy");
+            } else {
+              o.hit = 1;
+              track("mode_action", { module: "C", a: "evade" });
+            }
+          }
+        }
+
+        btn("laneDrift", x + 14, y + h - 62, (w - 28 - 14) / 2, 48, "漂移", "primary", () => {
+          const run = state.flow.run;
+          run.res = run.res || { ink: 2, heat: 0, focus: 2 };
+          if ((run.res.focus || 0) <= 0) return toast("专注不足");
+          run.res.focus -= 1;
+          ms.invUntil = now() + 900;
+          ms.focusSpend = (ms.focusSpend || 0) + 1;
+          track("mode_action", { module: "C", a: "drift", left: run.res.focus });
+          saveState();
+        });
+        btn("laneCalm", x + 28 + (w - 28 - 14) / 2, y + h - 62, (w - 28 - 14) / 2, 48, "继续", "ghost", () => finishTurnMode(cur, (ms.hit || 0) <= 1));
+
+        hot2(
+          "laneArea",
+          trackX,
+          trackY,
+          trackW,
+          trackH,
+          "whisper",
+          "light",
+          () => {
+            const dx = ui.mx - ui.downX;
+            if (ui.moved && Math.abs(dx) > 60) {
+              ms.lane = clamp(ms.lane + (dx < 0 ? 1 : -1), 0, 2);
+              track("mode_action", { module: "C", a: "lane", lane: ms.lane });
+              saveState();
+            }
+          },
+          () => {
+            ms.speed = clamp((ms.speed || 0.018) * 0.70, 0.010, 0.022);
+            track("mode_action", { module: "C", a: "brake" });
+            saveState();
+          }
+        );
       }
 
       function vnRole(moduleId) {
@@ -5395,6 +7959,16 @@
           saveState();
         });
         y += 70;
+        btn("openSkills", x, y, innerW, 56, "成长（技能树）", "primary", () => {
+          state.flow.scene = "skills";
+          saveState();
+        });
+        y += 70;
+        btn("openAnalytics", x, y, innerW, 56, "数据看板（本地统计）", "primary", () => {
+          state.flow.scene = "analytics";
+          saveState();
+        });
+        y += 70;
         btn("toggleVoice", x, y, innerW, 56, `配音：${state.settings.voiceOn ? "开" : "关"}`, state.settings.voiceOn ? "primary" : "ghost", () => {
           state.settings.voiceOn = !state.settings.voiceOn;
           saveState();
@@ -5831,6 +8405,7 @@
           return;
         }
         vnUpdate(rt);
+        vn2UpdateQte(rt);
         const pad = 14;
         const top = insetTop;
         const w = aw - pad * 2;
@@ -5878,11 +8453,42 @@
           }
         }
 
+        const horrorP = clamp(0.08 + state.mirrorFracture * 0.02 + (rt.shakePow ? 0.05 : 0), 0, 0.75);
+        drawHorrorFX(horrorP, rt.fxSeed ^ hash32(rt.nodeId || ""));
+
         const portraitW = innerW * 0.60;
         const portraitH = innerH * 0.70;
         drawVNPortrait2_5D(rt, x + 14, top + 28, portraitW, portraitH);
 
-        btn("vn2Tap", x, top + 14, innerW, innerH - 28, "", "ghost", () => vn2SkipOrNext(rt));
+        if (rt.bubbleText && rt.bubbleAt && now() - rt.bubbleAt < 1600) {
+          const p = 1 - clamp((now() - rt.bubbleAt) / 1600, 0, 1);
+          const bx = x + innerW * 0.56;
+          const by = top + 34;
+          const bw = Math.min(340, innerW * 0.42);
+          const bh = 70;
+          rrPath(bx - bw / 2, by, bw, bh, 18);
+          ctx.fillStyle = `rgba(0,0,0,${0.34 + 0.18 * p})`;
+          ctx.fill();
+          ctx.strokeStyle = `rgba(255,255,255,${0.10 + 0.10 * p})`;
+          ctx.stroke();
+          ctx.fillStyle = "rgba(255,255,255,0.88)";
+          ctx.font = `700 ${Math.round(13 * uiScale)}px ${fontSans}`;
+          wrapText(rt.bubbleText, bx - bw / 2 + 12, by + 26, bw - 24, Math.round(18 * uiScale), "rgba(255,255,255,0.88)");
+        }
+
+        btn(
+          "vn2Tap",
+          x,
+          top + 14,
+          innerW,
+          innerH - 28,
+          "",
+          "ghost",
+          () => {
+            if (rt.qte) vn2ResolveQte(rt, true);
+            else vn2SkipOrNext(rt);
+          }
+        );
 
         btn("vn2Rollback", x + innerW - 110, top + 22, 96, 40, "回溯", "ghost", () => vn2Rollback(rt));
         btn("vn2Saves", x + innerW - 110, top + 70, 96, 40, "存档", "ghost", () => {
@@ -5918,6 +8524,38 @@
           const show = rt.lineText.slice(0, Math.floor(rt.shown));
           wrapTextStroke(show, bx + 22, by + 84, bw - 44, Math.round(40 * uiScale), "#f3f3f3", "#2a2a2a");
           ctx.lineWidth = 1;
+        }
+
+        if (rt.flashAt && rt.flashPow) {
+          const p = clamp(1 - (now() - rt.flashAt) / 180, 0, 1) * clamp(rt.flashPow, 0, 1);
+          if (p > 0.01) {
+            ctx.fillStyle = `rgba(255,255,255,${0.55 * p})`;
+            ctx.fillRect(0, 0, aw, ah);
+          }
+        }
+
+        if (rt.qte) {
+          const q = rt.qte;
+          const left = clamp(1 - (now() - q.t0) / q.ms, 0, 1);
+          const cx = x + innerW * 0.74;
+          const cy = top + innerH * 0.40;
+          rrPath(cx - 140, cy - 54, 280, 108, 18);
+          ctx.fillStyle = "rgba(0,0,0,0.42)";
+          ctx.fill();
+          ctx.strokeStyle = "rgba(255,255,255,0.16)";
+          ctx.stroke();
+          ctx.fillStyle = "rgba(255,255,255,0.92)";
+          ctx.font = `900 ${Math.round(14 * uiScale)}px ${fontSans}`;
+          ctx.fillText("QTE", cx - 124, cy - 22);
+          ctx.fillStyle = "rgba(255,255,255,0.72)";
+          ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+          ctx.fillText("0.8秒内点击画面", cx - 124, cy + 2);
+          rrPath(cx - 124, cy + 18, 248, 10, 999);
+          ctx.fillStyle = "rgba(255,255,255,0.10)";
+          ctx.fill();
+          rrPath(cx - 124, cy + 18, 248 * left, 10, 999);
+          ctx.fillStyle = "rgba(250,204,21,0.55)";
+          ctx.fill();
         }
 
         if (rt.options && rt.options.length) {
@@ -6740,6 +9378,8 @@
         ui.downAt = now();
         ui.mx = p.x;
         ui.my = p.y;
+        ui.downX = p.x;
+        ui.downY = p.y;
         ui.moved = false;
         ui.downId = "";
         if (e.pointerType === "touch") {
@@ -6792,6 +9432,43 @@
         }
         if (ui.downId === "helpScroll") {
           state.flow.helpScroll = clamp((state.flow.helpScroll || 0) - dy, 0, 520);
+          saveState();
+        }
+        if (ui.downId === "taskScroll") {
+          state.flow.taskScroll = clamp((state.flow.taskScroll || 0) - dy, 0, 1100);
+          saveState();
+        }
+        if (ui.downId === "skillScroll") {
+          state.flow.skillScroll = clamp((state.flow.skillScroll || 0) - dy, 0, 820);
+          saveState();
+        }
+        if (ui.downId === "rightSwipe") {
+          ensureDrawers();
+          const f = state.flow.drawers;
+          f.swipeDx = clamp(ui.mx - ui.downX, -140, 140);
+        }
+        if (ui.downId === "drag_inv_edge") {
+          ensureDrawers();
+          const d = state.flow.drawers.items.inv;
+          const w = d.w || clamp(Math.round(aw * 0.78), 280, 430);
+          d.p = clamp((ui.mx - ui.downX) / w, 0, 1);
+          d.target = d.p;
+          saveState();
+        }
+        if (ui.downId === "drag_right_edge") {
+          ensureDrawers();
+          const d = state.flow.drawers.items.right;
+          const w = d.w || clamp(Math.round(aw * 0.78), 280, 430);
+          d.p = clamp((ui.downX - ui.mx) / w, 0, 1);
+          d.target = d.p;
+          saveState();
+        }
+        if (ui.downId === "drag_quick_edge") {
+          ensureDrawers();
+          const d = state.flow.drawers.items.quick;
+          const hh = d.h || clamp(Math.round(ah * 0.42), 240, 420);
+          d.p = clamp((ui.downY - ui.my) / hh, 0, 1);
+          d.target = d.p;
           saveState();
         }
         if (ui.downId === "vn2EndScroll") {
@@ -6874,16 +9551,46 @@
           if (vnGesture.touches.size < 2) vnGesture.armed = false;
         }
         if (!id) return;
+        if (id === "rightSwipe") {
+          ensureDrawers();
+          const f = state.flow.drawers;
+          const dx = f.swipeDx || 0;
+          f.swipeDx = 0;
+          if (Math.abs(dx) >= 70) {
+            const order = ["tasks", "ach", "settings"];
+            const idx = Math.max(0, order.indexOf(f.rightTab || "tasks"));
+            const next = dx < 0 ? Math.min(order.length - 1, idx + 1) : Math.max(0, idx - 1);
+            f.rightTab = order[next];
+            saveState();
+          }
+          return;
+        }
+        if (id === "drag_inv_edge" || id === "drag_right_edge" || id === "drag_quick_edge") {
+          ensureDrawers();
+          const ds = state.flow.drawers.items;
+          const d = id === "drag_inv_edge" ? ds.inv : id === "drag_right_edge" ? ds.right : ds.quick;
+          d.target = d.p > 0.5 ? 1 : 0;
+          saveState();
+          return;
+        }
         const it = ui.items.find((x) => x.id === id);
         if (!it) return;
         if (it.type === "btn") {
           addRipple(ui.mx, ui.my, "rgba(34,211,238,0.22)");
-          audioSfx("ui");
+          audioSfx(it.feedback || "ui");
+          if (it.haptic) haptic(it.haptic);
           if (held > 520 && it.onHold) {
             it.onHold();
             return;
           }
           if (it.onClick) it.onClick();
+        }
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState !== "visible") {
+          saveLastAt = 0;
+          flushSaveState();
         }
       });
 
@@ -6996,7 +9703,14 @@
             perf.lastFpsAt = t0;
           }
           perf.lastAt = t0;
+          flushSaveState();
           uiBegin();
+          ensureTelemetry();
+          if (!state.flow._scenePrev) state.flow._scenePrev = state.flow.scene;
+          if (state.flow.scene !== state.flow._scenePrev) {
+            track("scene_enter", { from: state.flow._scenePrev, to: state.flow.scene });
+            state.flow._scenePrev = state.flow.scene;
+          }
           ctx.textAlign = "left";
           ctx.textBaseline = "alphabetic";
           drawBackground();
@@ -7041,6 +9755,10 @@
           else if (s === "chapterSelect") drawChapterSelect();
           else if (s === "achievements") drawAchievements();
           else if (s === "help") drawHelp();
+          else if (s === "analytics") drawAnalytics();
+          else if (s === "challengeHome") drawChallengeHome();
+          else if (s === "battle") drawBattle();
+          else if (s === "skills") drawSkills();
           else if (s === "puzzle") drawPuzzle();
           else if (s === "ugcFeed") drawUGCFeed();
           else if (s === "ugcEdit") drawUGCEdit();
@@ -7050,6 +9768,7 @@
           else if (s === "aFail") drawFail("aFail");
           else if (s === "mirrorEgg") drawMirrorEgg();
           drawRipples();
+          drawGlobalDrawers();
           drawToast();
           requestAnimationFrame(frame);
         } catch {
@@ -7093,10 +9812,70 @@
           assert(state.flow.scene === "puzzle", "未进入 puzzle 场景");
           assert(state.flow.puzzle && state.flow.puzzle.phase === "intro", "puzzle phase 应为 intro");
         });
+        test("Turn: A/B/C 进入 mode 阶段", () => {
+          state.flow.scene = "hub";
+          ensureRun("fast");
+          openTurn("A");
+          assert(state.flow.scene === "turn", "未进入 turn 场景");
+          assert(state.flow.run && state.flow.run.current && state.flow.run.current.phase === "mode", "turn phase 应为 mode");
+          openTurn("B");
+          assert(state.flow.run.current.moduleId === "B", "未切换到 B");
+          openTurn("C");
+          assert(state.flow.run.current.moduleId === "C", "未切换到 C");
+        });
+        test("Perf: telemetrySummary 缓存命中", () => {
+          ensureTelemetry();
+          state.telemetry.events = [];
+          state.telemetry._v = 0;
+          track("x", {});
+          const s1 = telemetrySummary();
+          const s2 = telemetrySummary();
+          assert(s1 === s2, "summary 应返回同一对象（缓存）");
+        });
+        test("Perf: skillStat 缓存 + 失效", () => {
+          ensureSkills();
+          state.skills.points = 99;
+          state.skills.spent = {};
+          state.skills._v = 0;
+          const a0 = skillStat("comboWin");
+          unlockSkill("mind_1");
+          const a1 = skillStat("comboWin");
+          assert(a1 > a0, "解锁后 comboWin 应增加");
+          resetSkills();
+          const a2 = skillStat("comboWin");
+          assert(a2 === 0, "重置后 comboWin 应为 0");
+        });
+        test("Perf: equipStats 缓存 + 失效", () => {
+          state.inv = { items: [], equip: { weapon: null, charm: null, coat: null }, _v: 0 };
+          invAddItem({ uid: "u1", id: "w1", name: "退格短刃", slot: "weapon", rar: "bronze", p: 6, aff: [], ts: now() });
+          state.inv.equip.weapon = "u1";
+          state.inv._v += 1;
+          const e1 = equipStats();
+          const e2 = equipStats();
+          assert(e1 === e2, "equipStats 应缓存命中");
+          state.inv.equip.weapon = null;
+          state.inv._v += 1;
+          const e3 = equipStats();
+          assert(e3 !== e2, "装备变化后缓存应失效");
+        });
         return r;
       }
 
-      window.__debug = { smokeGameplay };
+      function perfBench() {
+        const t0 = performance.now();
+        ensureTelemetry();
+        for (let i = 0; i < 2000; i++) telemetrySummary();
+        const t1 = performance.now();
+        ensureSkills();
+        for (let i = 0; i < 20000; i++) skillStat("comboWin");
+        const t2 = performance.now();
+        state.inv = state.inv || { items: [], equip: { weapon: null, charm: null, coat: null }, _v: 0 };
+        for (let i = 0; i < 2000; i++) equipStats();
+        const t3 = performance.now();
+        return { telemetrySummary_ms: +(t1 - t0).toFixed(2), skillStat_ms: +(t2 - t1).toFixed(2), equipStats_ms: +(t3 - t2).toFixed(2) };
+      }
+
+      window.__debug = { smokeGameplay, perfBench };
       saveState();
       audioBgm("hub");
       requestAnimationFrame(frame);
