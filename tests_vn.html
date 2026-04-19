@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>VN/抽屉 交互测试</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+        background: #07090f;
+        color: rgba(255, 255, 255, 0.9);
+      }
+      .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+      .card {
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 14px;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      button {
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 700;
+        cursor: pointer;
+      }
+      pre {
+        margin: 12px 0 0;
+        padding: 12px;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        overflow: auto;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+      iframe {
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+      }
+      .ok {
+        color: rgba(34, 211, 238, 0.95);
+      }
+      .bad {
+        color: rgba(255, 77, 109, 0.95);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <div class="row">
+          <div>
+            <div style="font-weight:900">VN/抽屉玩法 Smoke Test</div>
+            <div style="opacity:.7;font-size:12px;margin-top:4px">加载 index.html 并运行内置 smokeGameplay</div>
+          </div>
+          <button id="run">运行测试</button>
+        </div>
+        <pre id="out">等待运行…</pre>
+      </div>
+    </div>
+
+    <iframe id="app" src="./index.html"></iframe>
+
+    <script>
+      const out = document.getElementById('out')
+      const btn = document.getElementById('run')
+      const iframe = document.getElementById('app')
+
+      const render = (r) => {
+        const lines = []
+        lines.push(`总计: ${r.total} 通过: ${r.passed} 失败: ${r.failed}`)
+        lines.push('')
+        for (const it of r.items) {
+          lines.push(`${it.ok ? '✅' : '❌'} ${it.name}`)
+          if (!it.ok) lines.push(String(it.error || 'unknown'))
+        }
+        out.textContent = lines.join('\n')
+        out.className = r.failed ? 'bad' : 'ok'
+      }
+
+      const run = async () => {
+        out.textContent = '运行中…'
+        await new Promise((r) => setTimeout(r, 250))
+        const w = iframe.contentWindow
+        if (!w || !w.__debug || !w.__debug.smokeGameplay) {
+          render({ total: 1, passed: 0, failed: 1, items: [{ name: 'debug hook', ok: false, error: 'index.html 未暴露 window.__debug.smokeGameplay' }] })
+          return
+        }
+        const r = w.__debug.smokeGameplay()
+        render(r)
+      }
+
+      btn.addEventListener('click', run)
+    </script>
+  </body>
+</html>
+

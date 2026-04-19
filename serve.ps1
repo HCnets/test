@@ -1,11 +1,22 @@
 $ErrorActionPreference = 'Stop'
 
-$prefix = 'http://localhost:8000/'
+$port = 8000
+$prefix = $null
+$listener = $null
+while ($true) {
+  $prefix = "http://localhost:$port/"
+  try {
+    $listener = New-Object System.Net.HttpListener
+    $listener.Prefixes.Add($prefix)
+    $listener.Start()
+    break
+  } catch {
+    try { if ($listener) { $listener.Stop(); $listener.Close() } } catch {}
+    if ($port -ge 8010) { throw }
+    $port += 1
+  }
+}
 $root = (Get-Location).Path
-
-$listener = [System.Net.HttpListener]::new()
-$listener.Prefixes.Add($prefix)
-$listener.Start()
 Write-Host ("LISTENING " + $prefix + " ROOT " + $root)
 
 try {

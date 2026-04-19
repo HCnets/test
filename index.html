@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
     <title>23:59 的赛博抽屉</title>
     <style>
+      :root {
+        --sat: env(safe-area-inset-top, 0px);
+        --sab: env(safe-area-inset-bottom, 0px);
+      }
       html,
       body {
         height: 100%;
@@ -627,6 +631,8 @@
             vnAuto: false,
             vnTypeSfx: true,
             vnHideBox: false,
+            perfMode: false,
+            showFps: false,
           },
           flow: { scene: "hub", mode: "fast", run: null, chapter: null, toast: "", ugcEditStartedAt: 0, ripples: [] },
           vn: { progress: {}, read: {} },
@@ -644,6 +650,12 @@
             },
           },
           achievements: { unlocked: {}, stats: { chaptersCleared: 0, endings: 0, speedrunBest: 0, votes: 0 } },
+          puzzle: { unlocked: { p1: true }, progress: {}, stats: {} },
+          drawerMeta: {
+            A: { lv: 1, xp: 0, seen: false },
+            B: { lv: 1, xp: 0, seen: false },
+            C: { lv: 1, xp: 0, seen: false },
+          },
           stats: {
             headwindCharge: 0,
             mileage: 0,
@@ -676,6 +688,8 @@
           vn: { ...b.vn, ...(s.vn || {}) },
           vn2: { ...b.vn2, ...(s.vn2 || {}) },
           achievements: { ...b.achievements, ...(s.achievements || {}) },
+          puzzle: { ...b.puzzle, ...(s.puzzle || {}) },
+          drawerMeta: { ...b.drawerMeta, ...(s.drawerMeta || {}) },
         };
       }
       function saveState() {
@@ -687,6 +701,26 @@
       function purgeHistory() {
         const cut = now() - DEDUPE_DAYS * DAY_MS;
         state.storyHist = (state.storyHist || []).filter((x) => x && x.ts >= cut);
+      }
+
+      const DRAWER_XP_TABLE = [0, 4, 10, 18, 28, 40];
+      function drawerMeta(moduleId) {
+        state.drawerMeta = state.drawerMeta || { A: { lv: 1, xp: 0, seen: false }, B: { lv: 1, xp: 0, seen: false }, C: { lv: 1, xp: 0, seen: false } };
+        return state.drawerMeta[moduleId] || (state.drawerMeta[moduleId] = { lv: 1, xp: 0, seen: false });
+      }
+      function drawerLevel(moduleId) {
+        return clamp((drawerMeta(moduleId).lv || 1) | 0, 1, 6);
+      }
+      function gainDrawerXp(moduleId, add) {
+        const m = drawerMeta(moduleId);
+        m.xp = (m.xp || 0) + (add || 0);
+        let lv = m.lv || 1;
+        while (lv < DRAWER_XP_TABLE.length && m.xp >= DRAWER_XP_TABLE[lv]) lv += 1;
+        if (lv !== m.lv) {
+          m.lv = lv;
+          toast(`抽屉${moduleId} 等级提升：Lv.${lv}`);
+          audioSfx("crown");
+        }
       }
 
       function moodVector() {
@@ -800,7 +834,8 @@
       function buildTurn(moduleId, input, extra) {
         purgeHistory();
         const used = (state.flow.run && state.flow.run.usedTopics) || {};
-        const seed = seedFrom([moduleId, dayKey(now()), state.weekThemeKey, String(state.mirrorFracture), shortInput(input)]);
+        const lv = drawerLevel(moduleId);
+        const seed = seedFrom([moduleId, dayKey(now()), state.weekThemeKey, String(state.mirrorFracture), `lv${lv}`, shortInput(input)]);
         const rng = mulberry32(hash32(seed));
         const vars = {
           boss: pick(BANK.boss, rng) || "老板",
@@ -848,22 +883,71 @@
         const verdict = pick(MIRROR_LINES, rng);
         const style = styleFromFracture();
         const opening = `${state.dailySign} · 23:59 · ${vars.boss}`;
+        const run = state.flow.run;
+        const res = (run && run.res) || { ink: 0, heat: 0, focus: 0 };
+        const variants =
+          moduleId === "A"
+            ? lv >= 3
+              ? [
+                  { id: "A_memory", name: "回声调酒", desc: "留半价留言将被放大" },
+                  { id: "A_rush", name: "加急出杯", desc: "高收益但更危险" },
+                  { id: "A_balance", name: "甜度平衡", desc: "甜度会改变裂纹波动" },
+                ]
+              : lv >= 2
+                ? [
+                    { id: "A_memory", name: "回声调酒", desc: "留言越具体越值钱" },
+                    { id: "A_balance", name: "甜度平衡", desc: "选择甜度影响风险" },
+                  ]
+                : [{ id: "A_balance", name: "甜度平衡", desc: "先学会选甜度" }]
+            : moduleId === "B"
+              ? lv >= 3
+                ? [
+                    { id: "B_stamp", name: "封蜡加印", desc: `消耗墨水提升寄出收益（墨水${res.ink})` },
+                    { id: "B_edit", name: "五字改命", desc: "更短更狠" },
+                    { id: "B_putback", name: "抽屉回避", desc: "更容易触发隐藏线" },
+                  ]
+                : lv >= 2
+                  ? [
+                      { id: "B_stamp", name: "封蜡加印", desc: `消耗墨水提升寄出收益（墨水${res.ink})` },
+                      { id: "B_edit", name: "五字改命", desc: "用短句改变结局倾向" },
+                    ]
+                  : [{ id: "B_edit", name: "五字改命", desc: "先学会把话缩短" }]
+              : lv >= 3
+                ? [
+                    { id: "C_pit", name: "服务区", desc: "补给换节奏" },
+                    { id: "C_drift", name: "镜面漂移", desc: `消耗专注提升称王成功率（专注${res.focus})` },
+                    { id: "C_lane", name: "双线抉择", desc: "风险/收益随裂纹变化" },
+                  ]
+                : lv >= 2
+                  ? [
+                      { id: "C_pit", name: "服务区", desc: "先学会补给" },
+                      { id: "C_lane", name: "双线抉择", desc: "学会看裂纹" },
+                    ]
+                  : [{ id: "C_lane", name: "双线抉择", desc: "先学会走路" }];
+        const variant = variants[(rng() * variants.length) | 0];
+
+        const objective =
+          moduleId === "A"
+            ? { id: "obj_leave", name: "写一句半价留言", ok: !!(extra && extra.leaveText && String(extra.leaveText).trim()), reward: "糖度+1" }
+            : moduleId === "B"
+              ? { id: "obj_5", name: "尽量短（≤5字）", ok: shortInput(input).replace(/\s+/g, "").length <= 5, reward: "红豆+1" }
+              : { id: "obj_theme", name: "带上本周主题词", ok: String(input || "").includes(state.weekThemeKey), reward: "蹄印+1" };
         let narration = "";
         if (moduleId === "A") {
           const sugar = extra && extra.sugar ? extra.sugar : "三分糖";
           const echo = pullEcho(rng);
-          narration = [hook, surreal, `猫把杯子推过来：${sugar}。`, echo ? `回声留言：${echo}` : "回声池还在等第一句话。", landing].join("\n");
+          narration = [hook, surreal, `猫把杯子推过来：${sugar}。`, `机制：${variant.name}（${variant.desc}）`, echo ? `回声留言：${echo}` : "回声池还在等第一句话。", landing].join("\n");
         } else if (moduleId === "B") {
           const mode = extra && extra.bMode ? extra.bMode : "say";
           const hint = mode === "edit5" ? `你用“五字改命”：${shortInput(input).slice(0, 5)}` : `你写下：${shortInput(input)}`;
-          narration = [hook, surreal, "你摸到那封未寄出的信，红豆贴在封口。", "同桌的步频在走廊里跑过，七里香跟着风回来。", hint, landing].join("\n");
+          narration = [hook, surreal, "你摸到那封未寄出的信，红豆贴在封口。", `机制：${variant.name}（${variant.desc}）`, "同桌的步频在走廊里跑过，七里香跟着风回来。", hint, landing].join("\n");
         } else {
           const spell = shortInput(input);
-          narration = [hook, surreal, `你以召唤师的名义开口：${spell}。`, "马蹄一落，工位像被撤回。", "公路旅行在雨里亮起霓虹路牌。", "逆风如解意。", landing].join("\n");
+          narration = [hook, surreal, `你以召唤师的名义开口：${spell}。`, `机制：${variant.name}（${variant.desc}）`, "马蹄一落，工位像被撤回。", "公路旅行在雨里亮起霓虹路牌。", "逆风如解意。", landing].join("\n");
         }
         const tags = [ev.topic, state.weekThemeKey, `裂纹${state.mirrorFracture}`, moduleId === "A" ? "深夜食堂" : moduleId === "B" ? "未寄出" : "公路旅行"];
         const shareCard = { headline: moduleId === "A" ? "谷雨处方签" : moduleId === "B" ? "未寄出的回信" : "逃亡称王战报", quote: verdict.length > 18 ? verdict.slice(0, 18) : verdict, tags, seed };
-        const choices =
+        let choices =
           moduleId === "A"
             ? [
                 { id: "A", label: "留第二杯半价", hint: "裂纹-1，糖度+1" },
@@ -879,7 +963,29 @@
                   { id: "A", label: "继续逃亡", hint: "里程+1，蹄印+1，燃料-1" },
                   { id: "B", label: "正面称王", hint: "成功加冕（失败裂纹+1）" },
                 ];
-        return { turnId: seedFrom([seed, "t"]), moduleId, eventId: ev.id, topic: ev.topic, opening, style, narration, verdict, choices, shareCard, sig, ts: now(), voice: voiceLine(moduleId, rng) };
+
+        if (moduleId === "C" && variant.id === "C_pit") {
+          choices = [
+            { id: "A", label: "继续逃亡", hint: "里程+1，蹄印+1，燃料-1" },
+            { id: "C", label: "进服务区", hint: "燃料+2，里程不变" },
+            { id: "B", label: "正面称王", hint: "成功加冕（可用专注提升）" },
+          ];
+        }
+        if (moduleId === "A" && variant.id === "A_rush") {
+          choices = [
+            { id: "A", label: "留第二杯半价", hint: "裂纹-1，糖度+1" },
+            { id: "C", label: "加急出杯", hint: "糖度+2（裂纹有波动）" },
+            { id: "B", label: "把这杯带回工位", hint: "裂纹+1" },
+          ];
+        }
+        if (moduleId === "B" && variant.id === "B_stamp") {
+          choices = [
+            { id: "A", label: "寄出（加印）", hint: "消耗墨水：红豆+2，裂纹-2" },
+            { id: "B", label: "塞回", hint: "裂纹+1（可能触发彩蛋）" },
+            { id: "C", label: "烧掉", hint: "裂纹-1（更释怀）" },
+          ];
+        }
+        return { turnId: seedFrom([seed, "t"]), moduleId, lv, variant, objective, eventId: ev.id, topic: ev.topic, opening, style, narration, verdict, choices, shareCard, sig, ts: now(), voice: voiceLine(moduleId, rng) };
       }
 
       function pushHistory(turn) {
@@ -908,8 +1014,19 @@
       let ah = 0;
       let dpr = 1;
       let uiScale = 1;
+      let safeTop = 0;
+      let safeBottom = 0;
+      let insetTop = 84;
+      let insetBottom = 84;
+      const perf = { lastAt: 0, frames: 0, lastFpsAt: 0, fps: 60 };
       function resize() {
-        dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+        const cs = getComputedStyle(document.documentElement);
+        safeTop = parseFloat(cs.getPropertyValue("--sat")) || 0;
+        safeBottom = parseFloat(cs.getPropertyValue("--sab")) || 0;
+        insetTop = 84 + safeTop;
+        insetBottom = 84 + safeBottom;
+        const cap = state && state.settings && state.settings.perfMode ? 1.75 : 2;
+        dpr = Math.max(1, Math.min(cap, window.devicePixelRatio || 1));
         aw = Math.floor(window.innerWidth);
         ah = Math.floor(window.innerHeight);
         uiScale = clamp(Math.min(aw / 420, ah / 780), 0.78, 1.05);
@@ -943,11 +1060,19 @@
         const r = { x, y, w, h };
         const hovered = hit(r);
         const pressed = ui.down && ui.downId === id;
+        const s = pressed ? 0.985 : hovered ? 1.01 : 1;
+        ctx.save();
+        ctx.translate(x + w / 2, y + h / 2);
+        ctx.scale(s, s);
+        ctx.translate(-(x + w / 2), -(y + h / 2));
         const bg = style === "primary" ? "rgba(139,92,246,0.22)" : style === "danger" ? "rgba(255,77,109,0.18)" : "rgba(255,255,255,0.06)";
         const stroke = style === "primary" ? "rgba(139,92,246,0.55)" : style === "danger" ? "rgba(255,77,109,0.55)" : "rgba(255,255,255,0.14)";
         rrPath(x, y, w, h, 14);
         ctx.fillStyle = pressed ? "rgba(255,255,255,0.10)" : hovered ? "rgba(255,255,255,0.09)" : bg;
+        ctx.shadowColor = hovered ? "rgba(0,0,0,0.45)" : "rgba(0,0,0,0)";
+        ctx.shadowBlur = hovered ? 14 : 0;
         ctx.fill();
+        ctx.shadowBlur = 0;
         ctx.strokeStyle = stroke;
         ctx.lineWidth = 1;
         ctx.stroke();
@@ -955,6 +1080,7 @@
         ctx.font = `600 ${Math.round(14 * uiScale)}px ${fontSans}`;
         const tw = ctx.measureText(text).width;
         ctx.fillText(text, x + (w - tw) / 2, y + h * 0.64);
+        ctx.restore();
         ui.items.push({ type: "btn", id, r, onClick, onHold });
       }
       function hot(id, x, y, w, h, onClick, onHold) {
@@ -1039,6 +1165,12 @@
 
       const easeOutCubic = (t) => 1 - Math.pow(1 - clamp(t, 0, 1), 3);
       const easeOutQuint = (t) => 1 - Math.pow(1 - clamp(t, 0, 1), 5);
+      const easeOutBack = (t) => {
+        const x = clamp(t, 0, 1);
+        const c1 = 1.70158;
+        const c3 = c1 + 1;
+        return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+      };
       const lerp = (a, b, t) => a + (b - a) * t;
 
       function drawBubble(x, y, w, h, tailX) {
@@ -1083,7 +1215,7 @@
           used[picki] = 1;
           chips.push({ id: "w" + i, t: picki, hue: (seed + i * 37) % 360 });
         }
-        cur.ui = { chips, picked: [], sug: cur.sugar || "三分糖", mode: cur.bMode || "say", lastTap: 0 };
+        cur.ui = { chips, picked: [], sug: cur.sugar || "三分糖", mode: cur.bMode || "say", leaveOn: cur.moduleId === "A", lastTap: 0 };
         if (!cur.sugar) cur.sugar = cur.ui.sug;
         if (!cur.bMode) cur.bMode = cur.ui.mode;
       }
@@ -1098,6 +1230,7 @@
         }
         if (!s) s = cur.moduleId === "A" ? "我有点累" : cur.moduleId === "B" ? "我没说出口" : "现在就发疯";
         cur.input = s;
+        if (cur.moduleId === "A") cur.leaveText = cur.ui.leaveOn ? s : "";
       }
 
       let drawerAssets = null;
@@ -1649,7 +1782,18 @@
 
       function ensureRun(mode) {
         if (state.flow.run) return;
-        state.flow.run = { mode, step: 1, startedAt: now(), usedTopics: {}, turns: [], current: null, turnStartAt: now(), turnLimitMs: 90000, forcedModule: null };
+        state.flow.run = {
+          mode,
+          step: 1,
+          startedAt: now(),
+          usedTopics: {},
+          turns: [],
+          current: null,
+          turnStartAt: now(),
+          turnLimitMs: 90000,
+          forcedModule: null,
+          res: { ink: 2, heat: 0, focus: 2 },
+        };
         state.stats.headwindCharge = 0;
         state.stats.mileage = 0;
         state.stats.fuel = 3;
@@ -1670,6 +1814,116 @@
       function startChapter() {
         state.flow.scene = "chapterSelect";
         saveState();
+      }
+
+      const PUZZLE_LEVELS = [
+        {
+          id: "p1",
+          name: "镜面回廊",
+          mech: { rotate: true, lift: false, color: false },
+          goal: "通过旋转让道路对齐",
+          graph: {
+            nodes: [
+              { id: "s", x: 0, y: 0, z: 0, kind: "start" },
+              { id: "a", x: 1, y: 0, z: 0 },
+              { id: "b", x: 2, y: 0, z: 0 },
+              { id: "c", x: 2, y: 1, z: 0 },
+              { id: "d", x: 1, y: 1, z: 0 },
+              { id: "g", x: 0, y: 1, z: 0, kind: "goal" },
+            ],
+            edges: [
+              { a: "s", b: "a", rot: [0, 1, 2, 3] },
+              { a: "a", b: "b", rot: [0, 2] },
+              { a: "b", b: "c", rot: [0, 2] },
+              { a: "c", b: "d", rot: [1, 3] },
+              { a: "d", b: "g", rot: [1, 3] },
+              { a: "b", b: "g", rot: [1], illusion: true },
+            ],
+            cam: { x: 1.1, y: 0.6, zoom: 1.0 },
+          },
+        },
+        {
+          id: "p2",
+          name: "升降图腾",
+          mech: { rotate: true, lift: true, color: false },
+          goal: "先练习升降，再用它锁定路径",
+          graph: {
+            nodes: [
+              { id: "s", x: 0, y: 0, z: 0, kind: "start" },
+              { id: "t", x: 1, y: 0, z: 0, kind: "lift" },
+              { id: "u", x: 2, y: 0, z: 0 },
+              { id: "v", x: 2, y: 1, z: 1, kind: "platform" },
+              { id: "w", x: 1, y: 1, z: 1 },
+              { id: "g", x: 0, y: 1, z: 1, kind: "goal" },
+            ],
+            edges: [
+              { a: "s", b: "t", rot: [0, 1, 2, 3] },
+              { a: "t", b: "u", rot: [0, 2] },
+              { a: "u", b: "v", rot: [0, 2], lift: 1 },
+              { a: "t", b: "w", rot: [1, 3], lift: 1, illusion: true },
+              { a: "w", b: "g", rot: [1, 3] },
+            ],
+            cam: { x: 1.0, y: 0.7, zoom: 1.0 },
+          },
+        },
+        {
+          id: "p3",
+          name: "颜色与形状",
+          mech: { rotate: true, lift: true, color: true },
+          goal: "用颜色提示解锁关键桥",
+          graph: {
+            nodes: [
+              { id: "s", x: 0, y: 0, z: 0, kind: "start" },
+              { id: "k", x: 1, y: 0, z: 0, kind: "key", color: "cyan" },
+              { id: "t", x: 2, y: 0, z: 0, kind: "lift" },
+              { id: "m", x: 2, y: 1, z: 1, kind: "platform" },
+              { id: "p", x: 1, y: 1, z: 1, shape: "triangle" },
+              { id: "g", x: 0, y: 1, z: 1, kind: "goal" },
+            ],
+            edges: [
+              { a: "s", b: "k", rot: [0, 1, 2, 3] },
+              { a: "k", b: "t", rot: [0, 2] },
+              { a: "t", b: "m", rot: [0, 2], lift: 1 },
+              { a: "m", b: "p", rot: [1, 3], lift: 1, gate: "cyan" },
+              { a: "p", b: "g", rot: [1, 3] },
+            ],
+            cam: { x: 1.1, y: 0.7, zoom: 1.0 },
+          },
+        },
+      ];
+
+      function puzzleDef(id) {
+        for (let i = 0; i < PUZZLE_LEVELS.length; i++) if (PUZZLE_LEVELS[i].id === id) return PUZZLE_LEVELS[i];
+        return PUZZLE_LEVELS[0];
+      }
+
+      function startPuzzle(id) {
+        const def = puzzleDef(id);
+        state.puzzle = state.puzzle || { unlocked: { p1: true }, progress: {}, stats: {} };
+        state.puzzle.stats = state.puzzle.stats || {};
+        state.puzzle.stats[id] = state.puzzle.stats[id] || { plays: 0, clears: 0, totalTimeMs: 0, hintClicks: 0 };
+        state.puzzle.stats[id].plays += 1;
+        const cam = def.graph.cam || { x: 1, y: 0.6, zoom: 1 };
+        state.flow.puzzle = {
+          id,
+          phase: "intro",
+          introAt: now(),
+          firstTap: 0,
+          showPanel: false,
+          rot: 0,
+          lift: 0,
+          key: {},
+          player: "s",
+          moving: null,
+          cam: { x: cam.x, y: cam.y, zoom: cam.zoom, tx: cam.x, ty: cam.y, tz: cam.zoom },
+          hintAt: 0,
+          hints: 0,
+          startedAt: 0,
+          solvedAt: 0,
+        };
+        state.flow.scene = "puzzle";
+        saveState();
+        audioBgm("final");
       }
 
       function gotoHub() {
@@ -1842,6 +2096,9 @@
         const cur = run.current;
         const turn = cur.turn;
         if (!turn) return;
+        run.res = run.res || { ink: 2, heat: 0, focus: 2 };
+        const res = run.res;
+        const vid = (turn.variant && turn.variant.id) || "";
 
         if (cur.ugcId) {
           const it = (state.ugc.items || []).find((x) => x.id === cur.ugcId);
@@ -1881,27 +2138,49 @@
             state.stats.aRunSugar += 1;
             state.stats.aNoHalfPriceStreak = 0;
             state.stats.headwindCharge = clamp(state.stats.headwindCharge + 1, 0, 9);
-            if ((cur.leaveText || "").trim()) {
-              addEcho(cur.leaveText, cur.sugar, turn.shareCard.seed);
+            const leave = (cur.leaveText || "").trim();
+            if (leave) {
+              addEcho(leave, cur.sugar, turn.shareCard.seed);
               state.stats.aEchoGain += 1;
             }
             audioSfx("stamp");
+          } else if (choiceId === "C") {
+            const r = mulberry32(hash32(turn.shareCard.seed + "|rush|" + String(state.mirrorFracture)));
+            const drift = r() < 0.55 ? -1 : 1;
+            state.shards.sugar += 2;
+            state.mirrorFracture = clamp(state.mirrorFracture + drift, 0, 9);
+            res.heat = clamp((res.heat || 0) + 1, 0, 6);
+            state.stats.aRunSugar += 1;
+            state.stats.aNoHalfPriceStreak = 0;
+            audioSfx("shutter");
           } else {
             state.mirrorFracture = clamp(state.mirrorFracture + 1, 0, 9);
             state.stats.aNoHalfPriceStreak += 1;
+          }
+          if (vid === "A_balance") {
+            if (cur.sugar === "无糖") state.mirrorFracture = clamp(state.mirrorFracture + 1, 0, 9);
+            if (cur.sugar === "五分糖") state.mirrorFracture = clamp(state.mirrorFracture - 1, 0, 9);
+          }
+          if (vid === "A_memory" && (cur.leaveText || "").trim() && (choiceId === "A" || choiceId === "C")) {
+            state.shards.sugar += 1;
+            res.heat = clamp((res.heat || 0) + 1, 0, 6);
           }
           if (state.flow.mode === "chapter" && state.flow.chapter) {
             const ch = state.flow.chapter;
             ch.flags = ch.flags || { a: 0, b: 0, c: 0 };
             ch.flags.a += choiceId === "A" ? 2 : 1;
           }
+          drawerMeta("A").seen = true;
+          gainDrawerXp("A", choiceId === "B" ? 1 : 2);
         }
 
         if (turn.moduleId === "B") {
           const tone = turn.style === "glitch" ? "glitch" : turn.style === "calm" ? "warm" : "calm";
           if (choiceId === "A") {
-            state.shards.hongdou += 1;
-            state.mirrorFracture = clamp(state.mirrorFracture - 1, 0, 9);
+            const inkBoost = vid === "B_stamp" && (res.ink || 0) > 0;
+            if (inkBoost) res.ink -= 1;
+            state.shards.hongdou += inkBoost ? 2 : 1;
+            state.mirrorFracture = clamp(state.mirrorFracture - (inkBoost ? 2 : 1), 0, 9);
             state.stats.headwindCharge = clamp(state.stats.headwindCharge + 2, 0, 9);
             state.stats.bConsecutivePutBack = 0;
             audioSfx("stamp");
@@ -1929,6 +2208,8 @@
             ch.flags.b += choiceId === "A" ? 2 : choiceId === "B" ? 1 : 3;
             ch.flags.bLast = choiceId;
           }
+          drawerMeta("B").seen = true;
+          gainDrawerXp("B", choiceId === "B" ? 1 : 2);
         }
 
         if (turn.moduleId === "C") {
@@ -1939,9 +2220,17 @@
             state.stats.cFailStreak = 0;
             audioSfx("hoof");
             unlockNode("N3");
+          } else if (choiceId === "C") {
+            state.stats.fuel = clamp(state.stats.fuel + 2, 0, 9);
+            res.focus = clamp((res.focus || 0) + 1, 0, 6);
+            audioSfx("stamp");
           } else {
             const r = mulberry32(hash32(turn.shareCard.seed + "|king|" + String(state.stats.headwindCharge) + "|" + String(state.shards.hoofprint)));
-            const base = 0.3 + state.stats.headwindCharge * 0.08 + state.shards.hoofprint * 0.02 - state.mirrorFracture * 0.02;
+            let base = 0.3 + state.stats.headwindCharge * 0.08 + state.shards.hoofprint * 0.02 - state.mirrorFracture * 0.02;
+            if (vid === "C_drift" && (res.focus || 0) > 0) {
+              res.focus -= 1;
+              base += 0.10;
+            }
             const ok = r() < clamp(base, 0.22, 0.78);
             if (ok) {
               audioSfx("crown");
@@ -1960,6 +2249,14 @@
             ch.flags = ch.flags || { a: 0, b: 0, c: 0 };
             ch.flags.c += choiceId === "A" ? 1 : 2;
           }
+          drawerMeta("C").seen = true;
+          gainDrawerXp("C", choiceId === "A" ? 2 : 2);
+        }
+
+        if (turn.objective && turn.objective.ok) {
+          if (turn.objective.id === "obj_leave" && (choiceId === "A" || choiceId === "C")) state.shards.sugar += 1;
+          if (turn.objective.id === "obj_5" && choiceId === "A") state.shards.hongdou += 1;
+          if (turn.objective.id === "obj_theme" && choiceId === "A") state.shards.hoofprint += 1;
         }
 
         pushHistory(turn);
@@ -2152,7 +2449,7 @@
         const t = now() / 1000;
         ctx.strokeStyle = state.dailySign === "雨" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)";
         ctx.lineWidth = 1;
-        const n = 28;
+        const n = state.settings.perfMode ? 18 : 28;
         for (let i = 0; i < n; i++) {
           const x = ((i * 73) % aw) + (t * 25) % 73;
           const y = ((i * 91) % ah) + (t * 70) % 91;
@@ -2165,9 +2462,9 @@
 
       function drawHelp() {
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(0,0,0,0.28)";
         ctx.fill();
@@ -2183,34 +2480,61 @@
         ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
         ctx.fillText("所有信息区块都可点击 · 长按标题可复制seed", x, top + 52);
 
-        const y0 = top + 70;
+        const viewY = top + 60;
+        const viewH = h - 140;
+        const scrollMax = 520;
+        const scroll = clamp(state.flow.helpScroll || 0, 0, scrollMax);
+        state.flow.helpScroll = scroll;
+        ui.items.push({ type: "scroll", id: "helpScroll", r: { x: pad, y: viewY, w, h: viewH } });
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(pad, viewY, w, viewH);
+        ctx.clip();
+        ctx.translate(0, -scroll);
+
+        let y0 = top + 70;
         btn("helpChapter", x, y0, innerW, 56, "章节剧情（15min+）", "primary", () => {
           state.flow.scene = "chapterSelect";
           saveState();
         });
-        btn("helpVN", x, y0 + 70, innerW, 56, "视觉小说原型（章节树/回溯/存档）", "ghost", () => {
+        y0 += 70;
+        btn("helpVN", x, y0, innerW, 56, "视觉小说原型（章节树/回溯/存档）", "ghost", () => {
           state.flow.scene = "vn2Home";
           saveState();
         });
-        btn("helpAch", x, y0 + 140, innerW, 56, "成就与奖励", "ghost", () => {
+        y0 += 70;
+        btn("helpPuzzle", x, y0, innerW, 56, "镜面解谜关卡", "primary", () => startPuzzle("p1"));
+        y0 += 70;
+        btn("helpAch", x, y0, innerW, 56, "成就与奖励", "ghost", () => {
           state.flow.scene = "achievements";
           saveState();
         });
-        btn("helpSet", x, y0 + 210, innerW, 56, "设置（音量/打字/自动播放）", "ghost", () => {
+        y0 += 70;
+        btn("helpSet", x, y0, innerW, 56, "设置（音量/打字/自动播放）", "ghost", () => {
           state.flow.scene = "settings";
           saveState();
         });
-        rrPath(x, y0 + 290, innerW, 180, 16);
+        y0 += 78;
+        rrPath(x, y0, innerW, 180, 16);
         ctx.fillStyle = "rgba(0,0,0,0.18)";
         ctx.fill();
         ctx.strokeStyle = "rgba(255,255,255,0.12)";
         ctx.stroke();
         ctx.fillStyle = "rgba(255,255,255,0.86)";
         ctx.font = `700 ${Math.round(13 * uiScale)}px ${fontSans}`;
-        ctx.fillText("交互速记", x + 12, y0 + 316);
+        ctx.fillText("交互速记", x + 12, y0 + 26);
         ctx.fillStyle = "rgba(255,255,255,0.70)";
         ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
-        wrapText("· 点击抽屉：抽出并进入剧情\n· VN原型：对话点击继续/回溯按钮\n· 双指上滑：历史回看\n· 双指下滑：隐藏/显示对话框\n· H历史 / S设置 / Ctrl快进", x + 12, y0 + 340, innerW - 24, Math.round(18 * uiScale), "rgba(255,255,255,0.70)");
+        wrapText(
+          "· 点击抽屉：抽出并进入剧情\n· VN原型：对话点击继续/回溯按钮\n· 解谜：点金色节点移动，点面板按钮旋转/升降\n· 双指上滑：历史回看\n· 双指下滑：隐藏/显示对话框\n· H历史 / S设置 / Ctrl快进",
+          x + 12,
+          y0 + 50,
+          innerW - 24,
+          Math.round(18 * uiScale),
+          "rgba(255,255,255,0.70)"
+        );
+        ctx.restore();
 
         btn("helpBack", x, top + h - 74, innerW, 56, "返回", "primary", () => {
           state.flow.scene = "hub";
@@ -2218,20 +2542,354 @@
         });
       }
 
+      function puzzleNode(def, id) {
+        const ns = def.graph.nodes;
+        for (let i = 0; i < ns.length; i++) if (ns[i].id === id) return ns[i];
+        return ns[0];
+      }
+
+      function puzzleEdgeActive(def, rt, e, rot, lift, key) {
+        if (e.rot && !e.rot.includes(rot)) return false;
+        if (typeof e.lift === "number" && e.lift !== lift) return false;
+        if (e.gate && !(key && key[e.gate])) return false;
+        return true;
+      }
+
+      function puzzleAdj(def, rot, lift, key) {
+        const m = {};
+        const es = def.graph.edges;
+        for (let i = 0; i < es.length; i++) {
+          const e = es[i];
+          if (!puzzleEdgeActive(def, null, e, rot, lift, key)) continue;
+          m[e.a] = m[e.a] || [];
+          m[e.b] = m[e.b] || [];
+          m[e.a].push({ to: e.b, illusion: !!e.illusion });
+          m[e.b].push({ to: e.a, illusion: !!e.illusion });
+        }
+        return m;
+      }
+
+      function isoProject(x, y, z, rot) {
+        let xx = x;
+        let yy = y;
+        if (rot === 1) {
+          xx = y;
+          yy = -x;
+        } else if (rot === 2) {
+          xx = -x;
+          yy = -y;
+        } else if (rot === 3) {
+          xx = -y;
+          yy = x;
+        }
+        const sx = (xx - yy) * 0.866;
+        const sy = (xx + yy) * 0.5 - z * 0.9;
+        return { sx, sy };
+      }
+
+      function drawPuzzle() {
+        const rt = state.flow.puzzle;
+        if (!rt) {
+          gotoHub();
+          return;
+        }
+        const def = puzzleDef(rt.id);
+        const pad = 14;
+        const top = insetTop;
+        const w = aw - pad * 2;
+        const h = ah - top - insetBottom;
+        const x0 = pad + 14;
+        const y0 = top + 14;
+        const innerW = w - 28;
+        const innerH = h - 28;
+        rrPath(pad, top, w, h, 18);
+        ctx.fillStyle = "rgba(255,255,255,0.03)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.10)";
+        ctx.stroke();
+
+        const t = now();
+        const cam = rt.cam;
+        cam.x = lerp(cam.x, cam.tx, 0.08);
+        cam.y = lerp(cam.y, cam.ty, 0.08);
+        cam.zoom = lerp(cam.zoom, cam.tz, 0.08);
+
+        const centerX = x0 + innerW * 0.50;
+        const centerY = y0 + innerH * 0.52;
+        const unit = Math.min(innerW, innerH) * 0.16 * cam.zoom;
+
+        const bgKey = def.id === "p1" ? "mirror_council" : def.id === "p2" ? "bar" : "road";
+        drawDrawerBg({ bgKey, bgFrom: bgKey, bgT0: t }, pad, top, w, h);
+
+        const nodes = def.graph.nodes;
+        const edges = def.graph.edges;
+        const adj = puzzleAdj(def, rt.rot, rt.lift, rt.key);
+
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.translate(-cam.x * unit, -cam.y * unit);
+
+        for (let i = 0; i < edges.length; i++) {
+          const e = edges[i];
+          if (!puzzleEdgeActive(def, rt, e, rt.rot, rt.lift, rt.key)) continue;
+          const a = puzzleNode(def, e.a);
+          const b = puzzleNode(def, e.b);
+          const pa = isoProject(a.x, a.y, a.z + (a.kind === "platform" ? rt.lift : 0), rt.rot);
+          const pb = isoProject(b.x, b.y, b.z + (b.kind === "platform" ? rt.lift : 0), rt.rot);
+          ctx.beginPath();
+          ctx.moveTo(pa.sx * unit, pa.sy * unit);
+          ctx.lineTo(pb.sx * unit, pb.sy * unit);
+          ctx.strokeStyle = e.illusion ? "rgba(255,214,255,0.28)" : "rgba(255,255,255,0.20)";
+          ctx.lineWidth = e.illusion ? 3 : 4;
+          ctx.stroke();
+        }
+
+        const mx = ui.mx;
+        const my = ui.my;
+        let hoverNode = null;
+        for (let i = 0; i < nodes.length; i++) {
+          const n = nodes[i];
+          const z = n.z + (n.kind === "platform" ? rt.lift : 0);
+          const p = isoProject(n.x, n.y, z, rt.rot);
+          const sx = centerX + p.sx * unit - cam.x * unit;
+          const sy = centerY + p.sy * unit - cam.y * unit;
+          const r = 18;
+          if (Math.abs(mx - sx) + Math.abs(my - sy) < r * 1.6) hoverNode = n;
+        }
+
+        for (let i = 0; i < nodes.length; i++) {
+          const n = nodes[i];
+          const z = n.z + (n.kind === "platform" ? rt.lift : 0);
+          const p = isoProject(n.x, n.y, z, rt.rot);
+          const sx = p.sx * unit;
+          const sy = p.sy * unit;
+          const isPlayer = rt.player === n.id;
+          const isGoal = n.kind === "goal";
+          const reachable = !!(adj[rt.player] && adj[rt.player].some((x) => x.to === n.id));
+          const on = hoverNode && hoverNode.id === n.id;
+          ctx.beginPath();
+          ctx.arc(sx, sy, isPlayer ? 16 : 12, 0, Math.PI * 2);
+          let fill = "rgba(255,255,255,0.10)";
+          if (n.kind === "key") fill = "rgba(34,211,238,0.16)";
+          if (isGoal) fill = "rgba(139,92,246,0.18)";
+          if (reachable) fill = "rgba(250,204,21,0.14)";
+          if (isPlayer) fill = "rgba(255,255,255,0.22)";
+          ctx.fillStyle = fill;
+          ctx.fill();
+          ctx.strokeStyle = on ? "rgba(255,255,255,0.55)" : reachable ? "rgba(250,204,21,0.45)" : "rgba(255,255,255,0.16)";
+          ctx.lineWidth = on ? 3 : 2;
+          ctx.stroke();
+          if (n.shape === "triangle") {
+            ctx.beginPath();
+            ctx.moveTo(sx, sy - 8);
+            ctx.lineTo(sx - 7, sy + 6);
+            ctx.lineTo(sx + 7, sy + 6);
+            ctx.closePath();
+            ctx.strokeStyle = "rgba(255,255,255,0.28)";
+            ctx.stroke();
+          }
+          hot(
+            `pz_${n.id}`,
+            centerX + sx - cam.x * unit - 22,
+            centerY + sy - cam.y * unit - 22,
+            44,
+            44,
+            () => {
+              if (rt.phase === "intro") {
+                rt.phase = "play";
+                rt.firstTap = now();
+                rt.startedAt = now();
+                saveState();
+              }
+              if (rt.moving) return;
+              if (!reachable) {
+                rt.showPanel = true;
+                if (!rt.startedAt) rt.startedAt = now();
+                saveState();
+                audioSfx("ui");
+                return;
+              }
+              rt.moving = { from: rt.player, to: n.id, t0: now(), dur: 280 };
+              audioSfx("ui");
+              if (navigator.vibrate) navigator.vibrate(10);
+              saveState();
+            }
+          );
+        }
+
+        if (rt.moving) {
+          const mv = rt.moving;
+          const k = easeOutCubic((t - mv.t0) / mv.dur);
+          if (k >= 1) {
+            rt.player = mv.to;
+            rt.moving = null;
+            const nn = puzzleNode(def, rt.player);
+            if (nn.kind === "key" && nn.color) rt.key[nn.color] = true;
+            if (nn.kind === "goal") {
+              rt.solvedAt = now();
+              state.puzzle.progress[def.id] = { cleared: true, ts: now() };
+              if (def.id === "p1") state.puzzle.unlocked.p2 = true;
+              if (def.id === "p2") state.puzzle.unlocked.p3 = true;
+              const dur = rt.solvedAt - rt.startedAt;
+              state.puzzle.stats[def.id].clears += 1;
+              state.puzzle.stats[def.id].totalTimeMs += dur;
+              state.puzzle.stats[def.id].hintClicks += rt.hints;
+              saveState();
+            }
+          }
+        }
+
+        ctx.restore();
+
+        if (rt.phase === "intro") {
+          const p = clamp((t - rt.introAt) / 2600, 0, 1);
+          const k = easeOutQuint(p);
+          rt.cam.tx = lerp(def.graph.cam.x + 0.4, def.graph.cam.x, k);
+          rt.cam.ty = lerp(def.graph.cam.y - 0.25, def.graph.cam.y, k);
+          rt.cam.tz = lerp(1.25, 1.05, k);
+          ctx.save();
+          ctx.globalCompositeOperation = "multiply";
+          ctx.fillStyle = "rgba(0,0,0,0.30)";
+          ctx.fillRect(0, 0, aw, ah);
+          ctx.restore();
+          hot("pzIntroTap", 0, 0, aw, ah, () => {
+            rt.phase = "play";
+            rt.firstTap = now();
+            rt.showPanel = true;
+            rt.startedAt = now();
+            saveState();
+          });
+          return;
+        }
+
+        if (rt.solvedAt) {
+          const dur = rt.solvedAt - rt.startedAt;
+          ctx.fillStyle = "rgba(0,0,0,0.55)";
+          ctx.fillRect(0, 0, aw, ah);
+          const cardW = Math.min(innerW, 520);
+          const cardH = 260;
+          const cx = x0 + (innerW - cardW) / 2;
+          const cy = y0 + (innerH - cardH) / 2;
+          rrPath(cx, cy, cardW, cardH, 18);
+          ctx.fillStyle = "rgba(255,255,255,0.06)";
+          ctx.fill();
+          ctx.strokeStyle = "rgba(255,255,255,0.14)";
+          ctx.stroke();
+          ctx.fillStyle = "rgba(255,255,255,0.92)";
+          ctx.font = `800 ${Math.round(16 * uiScale)}px ${fontSans}`;
+          ctx.fillText("通关！", cx + 14, cy + 30);
+          ctx.fillStyle = "rgba(255,255,255,0.72)";
+          ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+          ctx.fillText(`${def.name} · 用时 ${(dur / 1000).toFixed(1)}s · 提示 ${rt.hints} 次`, cx + 14, cy + 54);
+          const st = state.puzzle.stats[def.id];
+          const rate = st.plays ? Math.round((st.clears / st.plays) * 100) : 0;
+          const avg = st.clears ? Math.round(st.totalTimeMs / st.clears / 1000) : 0;
+          const hintRate = st.plays ? Math.round((st.hintClicks / st.plays) * 100) : 0;
+          wrapText(`指标（本机存档统计）\n· 首次通关率：${rate}%（目标≥60%）\n· 平均解谜：${avg}s（目标90~180s）\n· 提示点击率：${hintRate}%（目标≤30%）`, cx + 14, cy + 82, cardW - 28, Math.round(18 * uiScale), "rgba(255,255,255,0.72)");
+          btn("pzNext", cx + 14, cy + cardH - 70, (cardW - 42) / 2, 56, "下一关", "primary", () => {
+            const next = def.id === "p1" ? "p2" : def.id === "p2" ? "p3" : "p1";
+            if (!state.puzzle.unlocked[next]) {
+              toast("下一关未解锁");
+              return;
+            }
+            startPuzzle(next);
+          });
+          btn("pzBack", cx + 28 + (cardW - 42) / 2, cy + cardH - 70, (cardW - 42) / 2, 56, "返回抽屉", "ghost", () => {
+            state.flow.puzzle = null;
+            gotoHub();
+          });
+          return;
+        }
+
+        if (rt.showPanel) {
+          ctx.fillStyle = "rgba(0,0,0,0.35)";
+          ctx.fillRect(0, 0, aw, ah);
+          const panelW = Math.min(innerW, 560);
+          const panelH = 170;
+          const px = x0 + (innerW - panelW) / 2;
+          const py = y0 + innerH - panelH - 10;
+          rrPath(px, py, panelW, panelH, 18);
+          ctx.fillStyle = "rgba(0,0,0,0.38)";
+          ctx.fill();
+          ctx.strokeStyle = "rgba(255,255,255,0.16)";
+          ctx.stroke();
+          ctx.fillStyle = "rgba(255,255,255,0.90)";
+          ctx.font = `800 ${Math.round(14 * uiScale)}px ${fontSans}`;
+          ctx.fillText(def.name, px + 14, py + 28);
+          ctx.fillStyle = "rgba(255,255,255,0.66)";
+          ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+          ctx.fillText(def.goal, px + 14, py + 50);
+
+          const bw = (panelW - 56) / 3;
+          btn("pzRotL", px + 14, py + 64, bw, 56, "左旋", "primary", () => {
+            rt.rot = (rt.rot + 3) % 4;
+            addRipple(px + 14 + bw * 0.5, py + 92, "rgba(34,211,238,0.18)");
+            audioSfx("ui");
+            saveState();
+          });
+          btn("pzRotR", px + 28 + bw, py + 64, bw, 56, "右旋", "primary", () => {
+            rt.rot = (rt.rot + 1) % 4;
+            addRipple(px + 28 + bw + bw * 0.5, py + 92, "rgba(34,211,238,0.18)");
+            audioSfx("ui");
+            saveState();
+          });
+          if (def.mech.lift) {
+            btn("pzLift", px + 42 + bw * 2, py + 64, bw, 56, rt.lift ? "降下" : "升起", "ghost", () => {
+              rt.lift = rt.lift ? 0 : 1;
+              audioSfx("stamp");
+              if (navigator.vibrate) navigator.vibrate(14);
+              saveState();
+            });
+          } else {
+            btn("pzLift", px + 42 + bw * 2, py + 64, bw, 56, "升降", "ghost", () => toast("本关不需要升降"));
+          }
+          btn("pzHint", px + 14, py + 124, bw, 40, "提示", "ghost", () => {
+            rt.hintAt = now();
+            rt.hints += 1;
+            saveState();
+          });
+          btn("pzExit", px + 28 + bw, py + 124, bw, 40, "退出", "ghost", () => {
+            state.flow.puzzle = null;
+            gotoHub();
+          });
+          btn("pzHide", px + 42 + bw * 2, py + 124, bw, 40, "收起", "ghost", () => {
+            rt.showPanel = false;
+            saveState();
+          });
+
+          if (rt.hintAt && now() - rt.hintAt < 1800) {
+            ctx.fillStyle = "rgba(250,204,21,0.22)";
+            ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+            ctx.fillText("提示：先试试旋转，让亮色边连接到终点。", px + 14, py - 10);
+          }
+        } else {
+          ctx.fillStyle = "rgba(255,255,255,0.62)";
+          ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+          ctx.fillText("点可达节点移动；需要旋转/升降时点右下角面板", x0, y0 + innerH - 14);
+          btn("pzShowBtn", x0 + innerW - 128, y0 + innerH - 56, 114, 42, "面板", "primary", () => {
+            rt.showPanel = true;
+            if (!rt.startedAt) rt.startedAt = now();
+            saveState();
+          });
+        }
+      }
+
       function drawTopBar() {
         const pad = 14;
         const h = 56;
-        rrPath(pad, pad, aw - pad * 2, h, 18);
+        const y0 = 14 + safeTop;
+        rrPath(pad, y0, aw - pad * 2, h, 18);
         ctx.fillStyle = "rgba(0,0,0,0.22)";
         ctx.fill();
         ctx.strokeStyle = "rgba(255,255,255,0.12)";
         ctx.stroke();
         ctx.fillStyle = "rgba(255,255,255,0.92)";
         ctx.font = `700 ${Math.round(14 * uiScale)}px ${fontSans}`;
-        ctx.fillText("23:59 的赛博抽屉", pad + 14, pad + 22);
+        ctx.fillText("23:59 的赛博抽屉", pad + 14, y0 + 22);
         ctx.fillStyle = "rgba(255,255,255,0.68)";
         ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
-        ctx.fillText(`谷雨·${state.dailySign}  裂纹${state.mirrorFracture}  ${state.weekThemeKey}`, pad + 14, pad + 44);
+        const leftLine = `谷雨·${state.dailySign}  裂纹${state.mirrorFracture}  ${state.weekThemeKey}`;
+        ctx.fillText(leftLine, pad + 14, y0 + 44);
         const right = pad + (aw - pad * 2) - 14;
         ctx.font = `12px ${fontMono}`;
         const seed = state.stats.lastSeed ? `seed:${state.stats.lastSeed}` : "seed:—";
@@ -2244,15 +2902,22 @@
           seedText = seed.slice(0, 6) + "…" + seed.slice(Math.max(6, seed.length - keep));
         }
         const tw2 = ctx.measureText(seedText).width;
-        ctx.fillText(seedText, right - tw2, pad + 44);
-        hot("copySeed", right - tw2 - 8, pad + 28, tw2 + 16, 26, () => {
+        ctx.fillText(seedText, right - tw2, y0 + 44);
+        hot("copySeed", right - tw2 - 8, y0 + 28, tw2 + 16, 26, () => {
           if (state.stats.lastSeed) copyText(`seed:${state.stats.lastSeed}`);
           else toast("暂无seed");
         }, () => {
           state.flow.scene = "help";
           saveState();
         });
-        hot("topTitle", pad, pad, aw - pad * 2, h, () => {
+        if (state.settings.showFps || state.settings.perfMode) {
+          const fpsText = `${Math.round(perf.fps)}fps`;
+          ctx.fillStyle = state.settings.perfMode ? "rgba(34,211,238,0.75)" : "rgba(255,255,255,0.55)";
+          ctx.font = `12px ${fontMono}`;
+          const ftw = ctx.measureText(fpsText).width;
+          ctx.fillText(fpsText, right - ftw, y0 + 22);
+        }
+        hot("topTitle", pad, y0, aw - pad * 2, h, () => {
           state.flow.scene = "help";
           saveState();
         });
@@ -2260,16 +2925,16 @@
 
       function drawHub() {
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         const x = pad + 14;
         const innerW = w - 28;
 
         state.flow.drawer = state.flow.drawer || { focus: -1, stage: "idle", t0: 0, dur: 650, moduleId: "A", talk: null, bgKey: "desk_rain", bgFrom: "desk_rain", bgT0: 0 };
         const d = state.flow.drawer;
         const t = now();
-        const p = d.stage === "opening" ? easeOutQuint((t - d.t0) / d.dur) : d.stage === "closing" ? 1 - easeOutCubic((t - d.t0) / d.dur) : d.stage === "open" ? 1 : 0;
+        const p = d.stage === "opening" ? easeOutBack((t - d.t0) / d.dur) : d.stage === "closing" ? 1 - easeOutCubic((t - d.t0) / d.dur) : d.stage === "open" ? 1 : 0;
         if (d.stage === "opening" && t - d.t0 >= d.dur) {
           d.stage = "open";
           d.talk = null;
@@ -2292,17 +2957,19 @@
 
         drawDrawerBg(d, pad, top, w, h);
 
-        ctx.fillStyle = "rgba(255,255,255,0.82)";
-        ctx.font = `800 ${Math.round(14 * uiScale)}px ${fontSans}`;
-        ctx.fillText("23:59 的赛博抽屉", x, top + 30);
-        ctx.fillStyle = "rgba(255,255,255,0.62)";
-        ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
-        const hint = "点击抽屉抽出 · 单手友好 · 进入后可Run/Chapter/UGC";
-        ctx.fillText(hint, x, top + 52);
-        hot("hubHint", x - 6, top + 38, innerW, 22, () => {
-          state.flow.scene = "help";
-          saveState();
-        });
+        if (d.stage === "idle") {
+          ctx.fillStyle = "rgba(255,255,255,0.82)";
+          ctx.font = `800 ${Math.round(14 * uiScale)}px ${fontSans}`;
+          ctx.fillText("23:59 的赛博抽屉", x, top + 30);
+          ctx.fillStyle = "rgba(255,255,255,0.62)";
+          ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+          const hint = "点击抽屉抽出 · 单手友好 · 进入后可Run/Chapter/UGC";
+          ctx.fillText(hint, x, top + 52);
+          hot("hubHint", x - 6, top + 38, innerW, 22, () => {
+            state.flow.scene = "help";
+            saveState();
+          });
+        }
 
         const trayH = Math.min(560, h - 210);
         const trayY = top + 74;
@@ -2323,44 +2990,55 @@
           const z = d.stage === "idle" ? 0 : isFocus ? lerp(0, 0.30, p) : lerp(0, -0.10, p);
           const blur = d.stage !== "idle" && !isFocus ? 0.16 : 0;
           drawDrawerCard(r, z, blur, items[i], isFocus);
-          hot(`drawerPick${i}`, r.x, r.y, r.w, r.h, () => {
-            if (d.stage !== "idle") return;
-            d.focus = i;
-            d.stage = "opening";
-            d.t0 = now();
-            d.dur = 650;
-            d.moduleId = items[i].moduleId;
-            d.bgFrom = d.bgKey;
-            d.bgKey = items[i].moduleId === "A" ? "bar" : items[i].moduleId === "B" ? "letter" : "road";
-            d.bgT0 = now();
+          if (d.stage === "idle") {
+            hot(`drawerPick${i}`, r.x, r.y, r.w, r.h, () => {
+              if (navigator.vibrate) navigator.vibrate(16);
+              addRipple(r.x + r.w * 0.78, r.y + r.h * 0.52, "rgba(34,211,238,0.20)");
+              d.focus = i;
+              d.stage = "opening";
+              d.t0 = now();
+              d.dur = 650;
+              d.moduleId = items[i].moduleId;
+              d.bgFrom = d.bgKey;
+              d.bgKey = items[i].moduleId === "A" ? "bar" : items[i].moduleId === "B" ? "letter" : "road";
+              d.bgT0 = now();
+              saveState();
+              audioBgm(items[i].moduleId);
+            });
+          }
+        }
+
+        if (d.stage === "idle") {
+          const quickY = trayY + trayH + 18;
+          btn("drawerChapter", dx, quickY, dw, 56, "章节剧情（15min+）", "primary", () => startChapter());
+          btn("drawerPuzzle", dx, quickY + 70, dw, 56, "解谜关卡（镜面建筑）", "primary", () => {
+            startPuzzle("p1");
+          });
+          btn("drawerUGC", dx, quickY + 140, dw, 56, "UGC创意工坊", "ghost", () => {
+            state.flow.scene = "ugcFeed";
+            state.flow.ugcDraft = ugcDefaultDraft();
             saveState();
-            audioBgm(items[i].moduleId);
+          });
+          btn("drawerTree", dx, quickY + 210, dw, 56, "章节树/收藏册", "ghost", () => {
+            state.flow.scene = "chapterTree";
+            saveState();
+          });
+          btn("drawerSettings", dx, quickY + 280, dw, 56, "设置", "ghost", () => {
+            state.flow.scene = "settings";
+            saveState();
+          });
+          btn("drawerAch", dx, quickY + 350, dw, 56, "成就", "ghost", () => {
+            state.flow.scene = "achievements";
+            saveState();
           });
         }
 
-        const quickY = trayY + trayH + 18;
-        btn("drawerChapter", dx, quickY, dw, 56, "章节剧情（15min+）", "primary", () => startChapter());
-        btn("drawerUGC", dx, quickY + 70, dw, 56, "UGC创意工坊", "ghost", () => {
-          state.flow.scene = "ugcFeed";
-          state.flow.ugcDraft = ugcDefaultDraft();
-          saveState();
-        });
-        btn("drawerTree", dx, quickY + 140, dw, 56, "章节树/收藏册", "ghost", () => {
-          state.flow.scene = "chapterTree";
-          saveState();
-        });
-        btn("drawerSettings", dx, quickY + 210, dw, 56, "设置", "ghost", () => {
-          state.flow.scene = "settings";
-          saveState();
-        });
-        btn("drawerAch", dx, quickY + 280, dw, 56, "成就", "ghost", () => {
-          state.flow.scene = "achievements";
-          saveState();
-        });
-
-        if (d.stage === "open") {
-          drawDrawerOpenOverlay(d, pad, top, w, h);
+        if (d.stage !== "idle") {
+          ctx.fillStyle = "rgba(0,0,0,0.55)";
+          ctx.fillRect(0, 0, aw, ah);
+          hot("hubMask", 0, 0, aw, ah, () => {}, () => {});
         }
+        if (d.stage === "open") drawDrawerOpenOverlay(d, pad, top, w, h);
       }
 
       function drawDrawerBg(d, pad, top, w, h) {
@@ -2376,7 +3054,8 @@
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = g;
         ctx.fill();
-        for (let i = 0; i < 26; i++) {
+        const n = state.settings.perfMode ? 14 : 26;
+        for (let i = 0; i < n; i++) {
           const r = 28 + (i % 7) * 10;
           const x = pad + 24 + ((i * 67 + (t / 18) * 0.8) % (w - 48));
           const y = top + 40 + (((i * 109 + (t / 30) * 0.6) % (h - 80)) | 0);
@@ -2412,7 +3091,7 @@
         rrPath(x, y, ww, hh, 18);
         ctx.fillStyle = "rgba(0,0,0,0.18)";
         ctx.shadowColor = "rgba(0,0,0,0.45)";
-        ctx.shadowBlur = 26;
+        ctx.shadowBlur = state.settings.perfMode ? 16 : 26;
         ctx.fill();
         ctx.shadowBlur = 0;
         ctx.strokeStyle = "rgba(255,255,255,0.14)";
@@ -3312,9 +3991,9 @@
         }
         vnUpdate(vn);
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         const x = pad + 14;
         const innerW = w - 28;
         const innerH = h;
@@ -3457,9 +4136,9 @@
         }
         vnUpdate(vn);
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(255,255,255,0.04)";
         ctx.fill();
@@ -3518,9 +4197,9 @@
 
       function drawChapterSelect() {
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(255,255,255,0.04)";
         ctx.fill();
@@ -3574,9 +4253,9 @@
 
       function drawAchievements() {
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(255,255,255,0.04)";
         ctx.fill();
@@ -3906,9 +4585,9 @@
 
       function drawTurn() {
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(255,255,255,0.04)";
         ctx.fill();
@@ -4145,6 +4824,44 @@
         ctx.strokeStyle = "rgba(255,255,255,0.10)";
         ctx.stroke();
 
+        drawModuleHUD(cur.moduleId, stageX + 12, stageY + 12, Math.min(260, innerW * 0.46));
+
+        const dm = drawerMeta(cur.moduleId);
+        if (!dm.seen) {
+          ctx.fillStyle = "rgba(0,0,0,0.58)";
+          ctx.fillRect(0, 0, aw, ah);
+          const cardW = Math.min(innerW, 560);
+          const cardH = 220;
+          const cx = stageX + (innerW - cardW) / 2;
+          const cy = stageY + (innerH - cardH) / 2;
+          rrPath(cx, cy, cardW, cardH, 18);
+          ctx.fillStyle = "rgba(0,0,0,0.42)";
+          ctx.fill();
+          ctx.strokeStyle = "rgba(255,255,255,0.16)";
+          ctx.stroke();
+          ctx.fillStyle = "rgba(255,255,255,0.92)";
+          ctx.font = `800 ${Math.round(16 * uiScale)}px ${fontSans}`;
+          ctx.fillText(`抽屉${cur.moduleId} · 新手引导`, cx + 14, cy + 30);
+          ctx.fillStyle = "rgba(255,255,255,0.72)";
+          ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
+          const tips =
+            cur.moduleId === "A"
+              ? "点词片组成一句话，打开半价留言会把这句话存进回声池。\n点击生成进入剧情，再做一次选择。"
+              : cur.moduleId === "B"
+                ? "点词片组成一句；切到“五字改命”会自动压缩成5字。\n寄出/塞回/烧掉会走向不同结局。"
+                : "点词片组成指令；逃亡消耗燃料，称王有概率。\n专注可在高等级时提升称王成功率。";
+          wrapText(tips, cx + 14, cy + 58, cardW - 28, Math.round(18 * uiScale), "rgba(255,255,255,0.72)");
+          btn("tutorOk", cx + 14, cy + cardH - 70, cardW - 28, 56, "我知道了", "primary", () => {
+            dm.seen = true;
+            saveState();
+          });
+          hot("tutorMask", 0, 0, aw, ah, () => {
+            dm.seen = true;
+            saveState();
+          });
+          return;
+        }
+
         const portraitW = innerW * 0.60;
         const portraitH = innerH * 0.72;
         const px = stageX + 14;
@@ -4169,6 +4886,13 @@
         ctx.fillStyle = "rgba(255,255,255,0.62)";
         ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
         ctx.fillText("点选词片组成一句，点击立绘触发反应", panelX + 14, panelY + 50);
+        if (cur.moduleId === "A") {
+          btn("leaveToggle", panelX + panelW - 140, panelY + 14, 126, 40, cur.ui.leaveOn ? "半价留言：开" : "半价留言：关", cur.ui.leaveOn ? "primary" : "ghost", () => {
+            cur.ui.leaveOn = !cur.ui.leaveOn;
+            refreshTurnInputFromUI(cur);
+            saveState();
+          });
+        }
         hot("turnHelp", panelX + 10, panelY + 34, panelW - 20, 20, () => {
           state.flow.scene = "help";
           saveState();
@@ -4268,7 +4992,7 @@
         }
 
         btn("toStory", x, top + h - 74, innerW, 56, "生成本回合（动画）", "primary", () => {
-          cur.turn = buildTurn(cur.moduleId, cur.input, { sugar: cur.sugar, bMode: cur.bMode });
+          cur.turn = buildTurn(cur.moduleId, cur.input, { sugar: cur.sugar, bMode: cur.bMode, leaveText: cur.leaveText });
           cur.phase = "story";
           cur.story = null;
           saveState();
@@ -4286,6 +5010,8 @@
         ctx.fill();
         ctx.strokeStyle = "rgba(255,255,255,0.10)";
         ctx.stroke();
+
+        drawModuleHUD(cur.moduleId, stageX + 12, stageY + 12, Math.min(260, innerW * 0.46));
 
         const bgKey = cur.moduleId === "A" ? "bar" : cur.moduleId === "B" ? "letter" : "road";
         const fakeDrawer = { bgKey, bgFrom: bgKey, bgT0: now() };
@@ -4338,6 +5064,17 @@
         ctx.font = `${Math.round(12 * uiScale)}px ${fontSans}`;
         const tip = st.done ? (st.idx < st.lines.length - 1 ? "点击继续" : "请选择") : "点击跳过";
         ctx.fillText(tip, bubbleX + 18, bubbleY + bubbleH - 18);
+
+        if (cur.turn && cur.turn.variant) {
+          const w1 = chip(bubbleX + 18, bubbleY - 30, cur.turn.variant.name, "rgba(255,255,255,0.78)", "rgba(0,0,0,0.18)", "rgba(255,255,255,0.12)");
+          hot("varInfo", bubbleX + 18, bubbleY - 30, w1, 24, () => toast(cur.turn.variant.desc || ""));
+        }
+        if (cur.turn && cur.turn.objective) {
+          const o = cur.turn.objective;
+          const txt = `${o.ok ? "✓" : "○"} ${o.name}`;
+          const w2 = chip(bubbleX + 28 + (cur.turn && cur.turn.variant ? ctx.measureText(cur.turn.variant.name).width + 34 : 0), bubbleY - 30, txt, "rgba(255,255,255,0.78)", "rgba(0,0,0,0.18)", "rgba(255,255,255,0.12)");
+          hot("objInfo", bubbleX + 28, bubbleY - 30, w2, 24, () => toast(o.reward || ""));
+        }
 
         hot("storyTap", stageX, stageY, innerW, innerH, () => {
           if (!st.done) {
@@ -4449,6 +5186,41 @@
         ctx.restore();
       }
 
+      function drawModuleHUD(moduleId, x, y, w) {
+        const m = drawerMeta(moduleId);
+        const lv = drawerLevel(moduleId);
+        const prev = DRAWER_XP_TABLE[Math.max(0, lv - 1)] || 0;
+        const next = DRAWER_XP_TABLE[Math.min(DRAWER_XP_TABLE.length - 1, lv)] || prev + 6;
+        const t = clamp(((m.xp || 0) - prev) / Math.max(1, next - prev), 0, 1);
+        rrPath(x, y, w, 66, 16);
+        ctx.fillStyle = "rgba(0,0,0,0.22)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.12)";
+        ctx.stroke();
+        ctx.fillStyle = "rgba(255,255,255,0.90)";
+        ctx.font = `800 ${Math.round(12 * uiScale)}px ${fontSans}`;
+        ctx.fillText(`抽屉${moduleId} · Lv.${lv}`, x + 12, y + 22);
+        rrPath(x + 12, y + 30, w - 24, 10, 999);
+        ctx.fillStyle = "rgba(255,255,255,0.10)";
+        ctx.fill();
+        rrPath(x + 12, y + 30, (w - 24) * t, 10, 999);
+        ctx.fillStyle = moduleId === "A" ? "rgba(250,204,21,0.45)" : moduleId === "B" ? "rgba(255,77,109,0.35)" : "rgba(34,211,238,0.45)";
+        ctx.fill();
+
+        const run = state.flow.run;
+        const res = (run && run.res) || { ink: 0, heat: 0, focus: 0 };
+        ctx.fillStyle = "rgba(255,255,255,0.62)";
+        ctx.font = `${Math.round(11 * uiScale)}px ${fontSans}`;
+        const s = moduleId === "A" ? `热度 ${res.heat || 0}` : moduleId === "B" ? `墨水 ${res.ink || 0}` : `专注 ${res.focus || 0}`;
+        const s2 = moduleId === "C" ? `燃料 ${state.stats.fuel}` : moduleId === "B" ? `裂纹 ${state.mirrorFracture}` : `糖度 ${state.shards.sugar}`;
+        ctx.fillText(s, x + 12, y + 58);
+        const tw = ctx.measureText(s2).width;
+        ctx.fillText(s2, x + w - 12 - tw, y + 58);
+        hot(`hud_${moduleId}`, x, y, w, 66, () => {
+          toast(`${moduleId} Lv.${lv} · xp ${m.xp || 0}/${next}`);
+        });
+      }
+
       function drawTurnResult(cur, pad, top, w, h) {
         const x = pad + 14;
         const innerW = w - 28;
@@ -4460,6 +5232,8 @@
         ctx.fill();
         ctx.strokeStyle = "rgba(255,255,255,0.10)";
         ctx.stroke();
+
+        drawModuleHUD(cur.moduleId, stageX + 12, stageY + 12, Math.min(260, innerW * 0.46));
 
         const bgKey = cur.moduleId === "A" ? "bar" : cur.moduleId === "B" ? "letter" : "road";
         const fakeDrawer = { bgKey, bgFrom: bgKey, bgT0: now() };
@@ -4530,9 +5304,9 @@
 
       function drawRunSummary() {
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(255,255,255,0.04)";
         ctx.fill();
@@ -4572,9 +5346,9 @@
 
       function drawSettings() {
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(255,255,255,0.04)";
         ctx.fill();
@@ -4606,6 +5380,19 @@
               audio.ac.suspend();
             } catch {}
           }
+        });
+        y += 70;
+
+        btn("togglePerf", x, y, innerW, 56, `性能模式：${state.settings.perfMode ? "开" : "关"}`, state.settings.perfMode ? "primary" : "ghost", () => {
+          state.settings.perfMode = !state.settings.perfMode;
+          saveState();
+          resize();
+        });
+        y += 70;
+
+        btn("toggleFps", x, y, innerW, 56, `FPS显示：${state.settings.showFps ? "开" : "关"}`, state.settings.showFps ? "primary" : "ghost", () => {
+          state.settings.showFps = !state.settings.showFps;
+          saveState();
         });
         y += 70;
         btn("toggleVoice", x, y, innerW, 56, `配音：${state.settings.voiceOn ? "开" : "关"}`, state.settings.voiceOn ? "primary" : "ghost", () => {
@@ -4769,9 +5556,9 @@
           return;
         }
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(255,255,255,0.04)";
         ctx.fill();
@@ -4832,9 +5619,9 @@
 
       function drawChapterTree() {
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(255,255,255,0.04)";
         ctx.fill();
@@ -4941,9 +5728,9 @@
 
       function drawVN2Home() {
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(255,255,255,0.04)";
         ctx.fill();
@@ -5045,9 +5832,9 @@
         }
         vnUpdate(rt);
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         const x = pad + 14;
         const innerW = w - 28;
         const innerH = h;
@@ -5162,9 +5949,9 @@
 
       function drawVN2Saves() {
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(255,255,255,0.04)";
         ctx.fill();
@@ -5210,9 +5997,9 @@
 
       function drawVN2Endings() {
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(255,255,255,0.04)";
         ctx.fill();
@@ -5311,9 +6098,9 @@
 
       function drawVN2Dev() {
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(255,255,255,0.04)";
         ctx.fill();
@@ -5405,9 +6192,9 @@
 
       function drawUGCFeed() {
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(255,255,255,0.04)";
         ctx.fill();
@@ -5524,9 +6311,9 @@
         if (d.gateValue === undefined || d.gateValue === null) d.gateValue = d.gate === "mood" ? 60 : d.gate === "none" ? 0 : 7;
         if (!d.choiceCount) d.choiceCount = 2;
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         if (!state.flow.ugcEditStartedAt) {
           state.flow.ugcEditStartedAt = now();
           saveState();
@@ -5729,9 +6516,9 @@
 
       function drawUGCImport() {
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(255,255,255,0.04)";
         ctx.fill();
@@ -5789,9 +6576,9 @@
         }
         const def = chapterDef(ch.id || "ch_core");
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(255,255,255,0.04)";
         ctx.fill();
@@ -5838,9 +6625,9 @@
 
       function drawFail(kind) {
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(255,255,255,0.04)";
         ctx.fill();
@@ -5870,9 +6657,9 @@
 
       function drawMirrorEgg() {
         const pad = 14;
-        const top = 84;
+        const top = insetTop;
         const w = aw - pad * 2;
-        const h = ah - top - 84;
+        const h = ah - top - insetBottom;
         rrPath(pad, top, w, h, 18);
         ctx.fillStyle = "rgba(255,255,255,0.04)";
         ctx.fill();
@@ -6003,13 +6790,17 @@
           state.flow.achScroll = clamp((state.flow.achScroll || 0) - dy, 0, 2000);
           saveState();
         }
+        if (ui.downId === "helpScroll") {
+          state.flow.helpScroll = clamp((state.flow.helpScroll || 0) - dy, 0, 520);
+          saveState();
+        }
         if (ui.downId === "vn2EndScroll") {
           state.flow.vn2EndScroll = clamp((state.flow.vn2EndScroll || 0) - dy, 0, 2600);
           saveState();
         }
         if (ui.downId === "mood") {
           const pad = 14;
-          const top = 84;
+          const top = insetTop;
           const w = aw - pad * 2;
           const x = pad + 14;
           const innerW = w - 28;
@@ -6021,7 +6812,7 @@
         }
         if (ui.downId === "vnSpeed") {
           const pad = 14;
-          const top = 84;
+          const top = insetTop;
           const w = aw - pad * 2;
           const x = pad + 14;
           const innerW = w - 28;
@@ -6035,7 +6826,7 @@
         }
         if (ui.downId === "musicVol") {
           const pad = 14;
-          const top = 84;
+          const top = insetTop;
           const w = aw - pad * 2;
           const x = pad + 14;
           const innerW = w - 28;
@@ -6048,7 +6839,7 @@
         }
         if (ui.downId === "sfxVol") {
           const pad = 14;
-          const top = 84;
+          const top = insetTop;
           const w = aw - pad * 2;
           const x = pad + 14;
           const innerW = w - 28;
@@ -6061,7 +6852,7 @@
         }
         if (ui.downId === "typeVol") {
           const pad = 14;
-          const top = 84;
+          const top = insetTop;
           const w = aw - pad * 2;
           const x = pad + 14;
           const innerW = w - 28;
@@ -6194,6 +6985,17 @@
 
       function frame() {
         try {
+          const t0 = now();
+          if (!perf.lastAt) perf.lastAt = t0;
+          if (!perf.lastFpsAt) perf.lastFpsAt = t0;
+          perf.frames++;
+          const span = t0 - perf.lastFpsAt;
+          if (span >= 1000) {
+            perf.fps = (perf.frames * 1000) / span;
+            perf.frames = 0;
+            perf.lastFpsAt = t0;
+          }
+          perf.lastAt = t0;
           uiBegin();
           ctx.textAlign = "left";
           ctx.textBaseline = "alphabetic";
@@ -6221,7 +7023,7 @@
             }
             const run2 = state.flow.run;
             if (run2 && run2.current && run2.current.phase === "story" && !run2.current.turn) {
-              run2.current.turn = buildTurn(run2.current.moduleId, run2.current.input, { sugar: run2.current.sugar, bMode: run2.current.bMode });
+              run2.current.turn = buildTurn(run2.current.moduleId, run2.current.input, { sugar: run2.current.sugar, bMode: run2.current.bMode, leaveText: run2.current.leaveText });
               saveState();
             }
             drawTurn();
@@ -6239,6 +7041,7 @@
           else if (s === "chapterSelect") drawChapterSelect();
           else if (s === "achievements") drawAchievements();
           else if (s === "help") drawHelp();
+          else if (s === "puzzle") drawPuzzle();
           else if (s === "ugcFeed") drawUGCFeed();
           else if (s === "ugcEdit") drawUGCEdit();
           else if (s === "ugcImport") drawUGCImport();
@@ -6257,6 +7060,43 @@
 
       state.dailySign = getDailySign(now());
       state.weekThemeKey = getWeekTheme(now()).key;
+
+      function smokeGameplay() {
+        const r = { total: 0, passed: 0, failed: 0, items: [] };
+        const test = (name, fn) => {
+          r.total += 1;
+          try {
+            fn();
+            r.passed += 1;
+            r.items.push({ name, ok: true });
+          } catch (e) {
+            r.failed += 1;
+            r.items.push({ name, ok: false, error: e && e.stack ? e.stack : String(e) });
+          }
+        };
+        const assert = (c, m) => {
+          if (!c) throw new Error(m);
+        };
+        test("buildTurn: A/B/C 都能生成 variant/objective", () => {
+          const ta = buildTurn("A", "我有点累", { sugar: "三分糖", bMode: "say", leaveText: "我有点累" });
+          const tb = buildTurn("B", "谢谢", { sugar: "三分糖", bMode: "edit5", leaveText: "" });
+          const tc = buildTurn("C", "发疯", { sugar: "三分糖", bMode: "say", leaveText: "" });
+          assert(ta.variant && ta.objective, "A 缺少 variant/objective");
+          assert(tb.variant && tb.objective, "B 缺少 variant/objective");
+          assert(tc.variant && tc.objective, "C 缺少 variant/objective");
+          assert(ta.choices.length >= 2 && ta.choices.length <= 3, "A choices 数量异常");
+          assert(tb.choices.length >= 2 && tb.choices.length <= 3, "B choices 数量异常");
+          assert(tc.choices.length >= 2 && tc.choices.length <= 3, "C choices 数量异常");
+        });
+        test("Puzzle: startPuzzle 进入 intro 并可切换", () => {
+          startPuzzle("p1");
+          assert(state.flow.scene === "puzzle", "未进入 puzzle 场景");
+          assert(state.flow.puzzle && state.flow.puzzle.phase === "intro", "puzzle phase 应为 intro");
+        });
+        return r;
+      }
+
+      window.__debug = { smokeGameplay };
       saveState();
       audioBgm("hub");
       requestAnimationFrame(frame);
