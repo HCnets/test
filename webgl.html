@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>23:59 的赛博抽屉 · WebGL</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        overflow: hidden;
+        overscroll-behavior: none;
+        background: #07090f;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        color: rgba(255, 255, 255, 0.92);
+      }
+      #root {
+        position: fixed;
+        inset: 0;
+      }
+      #gl {
+        position: absolute;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        display: block;
+      }
+      #ui {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      .panel {
+        position: absolute;
+        left: calc(12px + env(safe-area-inset-left));
+        top: calc(12px + env(safe-area-inset-top));
+        width: min(420px, calc(100vw - 24px));
+        border-radius: 16px;
+        background: rgba(0, 0, 0, 0.32);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(10px);
+        padding: 12px;
+        box-sizing: border-box;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .title {
+        font-weight: 800;
+        font-size: 14px;
+        letter-spacing: 0.2px;
+      }
+      .sub {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.65);
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .chip {
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .chip strong {
+        font-weight: 800;
+      }
+      .bar {
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .fill {
+        height: 100%;
+        width: 50%;
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.9), rgba(139, 92, 246, 0.9));
+        transform-origin: left center;
+      }
+      .equip {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .slot {
+        pointer-events: auto;
+        user-select: none;
+        border-radius: 14px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+      }
+      .slot:active {
+        transform: scale(0.98);
+      }
+      .slot.on {
+        background: rgba(34, 211, 238, 0.10);
+        border-color: rgba(34, 211, 238, 0.45);
+      }
+      .slot .k {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.62);
+      }
+      .slot .v {
+        margin-top: 4px;
+        font-size: 13px;
+        font-weight: 800;
+      }
+      #pad {
+        position: absolute;
+        left: calc(12px + env(safe-area-inset-left));
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        width: clamp(128px, 26vw, 168px);
+        height: clamp(128px, 26vw, 168px);
+        pointer-events: auto;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        backdrop-filter: blur(10px);
+        overflow: hidden;
+      }
+      #stick {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 56px;
+        height: 56px;
+        margin-left: -28px;
+        margin-top: -28px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.10);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+      }
+      #btns {
+        position: absolute;
+        right: calc(12px + env(safe-area-inset-right));
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        display: grid;
+        grid-template-columns: repeat(2, clamp(56px, 14vw, 74px));
+        gap: 10px;
+        pointer-events: auto;
+      }
+      .btn {
+        width: clamp(56px, 14vw, 74px);
+        height: clamp(56px, 14vw, 74px);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+        user-select: none;
+      }
+      .btn:active {
+        transform: scale(0.98);
+      }
+      #overlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        display: none;
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.30) 45%, rgba(0, 0, 0, 0.70));
+      }
+      #overlay.on {
+        display: block;
+      }
+      #overlayCard {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        top: 30%;
+        border-radius: 18px;
+        background: rgba(0, 0, 0, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        padding: 14px;
+      }
+      #overlayTitle {
+        font-weight: 900;
+        font-size: 16px;
+      }
+      #overlayText {
+        margin-top: 8px;
+        font-size: 13px;
+        line-height: 1.5;
+        color: rgba(255, 255, 255, 0.72);
+        white-space: pre-wrap;
+      }
+      #hint {
+        position: absolute;
+        left: calc(12px + env(safe-area-inset-left));
+        right: calc(12px + env(safe-area-inset-right));
+        bottom: calc(176px + env(safe-area-inset-bottom));
+        display: flex;
+        justify-content: center;
+        pointer-events: none;
+      }
+      #hint span {
+        font-size: 12px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.78);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <canvas id="gl"></canvas>
+      <div id="ui">
+        <div class="panel">
+          <div class="row">
+            <div>
+              <div class="title">23:59 的赛博抽屉 · 离线 WebGL</div>
+              <div class="sub" id="sub">左下摇杆移动 · 右下 攻/技/冲/镜 · 双指缩放</div>
+            </div>
+            <div class="sub" id="perf">FPS —</div>
+          </div>
+          <div style="margin-top:10px">
+            <div class="row">
+              <div class="sub">HP</div>
+              <div class="sub" id="hpText">—</div>
+            </div>
+            <div class="bar" style="margin-top:6px"><div class="fill" id="hpFill"></div></div>
+          </div>
+          <div class="chips" id="chips"></div>
+          <div class="equip" id="equip"></div>
+        </div>
+        <div id="hint"><span id="hintText">点击屏幕任意处开始（解锁音频）</span></div>
+        <div id="pad"><div id="stick"></div></div>
+        <div id="btns">
+          <div class="btn" id="btnAtk">攻</div>
+          <div class="btn" id="btnSkl">技</div>
+          <div class="btn" id="btnDash">冲</div>
+          <div class="btn" id="btnCam">镜</div>
+        </div>
+        <div id="overlay"><div id="overlayCard"><div id="overlayTitle"></div><div id="overlayText"></div></div></div>
+      </div>
+    </div>
+    <script type="module">
+      import { startApp } from './app.js'
+
+      const canvas = document.getElementById('gl')
+      const ui = {
+        sub: document.getElementById('sub'),
+        perf: document.getElementById('perf'),
+        hpText: document.getElementById('hpText'),
+        hpFill: document.getElementById('hpFill'),
+        chips: document.getElementById('chips'),
+        equip: document.getElementById('equip'),
+        pad: document.getElementById('pad'),
+        stick: document.getElementById('stick'),
+        btnAtk: document.getElementById('btnAtk'),
+        btnSkl: document.getElementById('btnSkl'),
+        btnDash: document.getElementById('btnDash'),
+        btnCam: document.getElementById('btnCam'),
+        hintText: document.getElementById('hintText'),
+        overlay: document.getElementById('overlay'),
+        overlayTitle: document.getElementById('overlayTitle'),
+        overlayText: document.getElementById('overlayText'),
+      }
+
+      startApp({ canvas, ui })
+    </script>
+  </body>
+</html>
+

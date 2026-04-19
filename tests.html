@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>WebGL 离线测试</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+        background: #07090f;
+        color: rgba(255, 255, 255, 0.9);
+      }
+      .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+      .card {
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 14px;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      button {
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 700;
+        cursor: pointer;
+      }
+      pre {
+        margin: 12px 0 0;
+        padding: 12px;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.10);
+        overflow: auto;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+      .ok {
+        color: rgba(34, 211, 238, 0.95);
+      }
+      .bad {
+        color: rgba(255, 77, 109, 0.95);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <div class="row">
+          <div>
+            <div style="font-weight:900">离线单元测试 + 集成测试</div>
+            <div style="opacity:.7;font-size:12px;margin-top:4px">不依赖网络，不依赖第三方测试框架</div>
+          </div>
+          <button id="run">运行测试</button>
+        </div>
+        <pre id="out">等待运行…</pre>
+      </div>
+    </div>
+    <script type="module">
+      import { runAllTests } from './tests.js'
+
+      const out = document.getElementById('out')
+      const btn = document.getElementById('run')
+
+      const render = (r) => {
+        const lines = []
+        lines.push(`总计: ${r.total} 通过: ${r.passed} 失败: ${r.failed}`)
+        lines.push('')
+        for (const it of r.items) {
+          lines.push(`${it.ok ? '✅' : '❌'} ${it.name}`)
+          if (!it.ok) lines.push(String(it.error || 'unknown'))
+        }
+        out.textContent = lines.join('\n')
+        out.className = r.failed ? 'bad' : 'ok'
+      }
+
+      btn.addEventListener('click', async () => {
+        out.textContent = '运行中…'
+        const r = await runAllTests()
+        render(r)
+      })
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,1063 @@
+﻿{
+    "schemaVersion":  1,
+    "generatedAt":  1776568946390,
+    "chapters":  [
+                     {
+                         "chapterId":  "vn_ch1",
+                         "title":  "雨夜回声·序曲",
+                         "entryNodeId":  "n_ch1_000",
+                         "unlockCondition":  "",
+                         "bundle":  "chapter_01"
+                     },
+                     {
+                         "chapterId":  "vn_ch2",
+                         "title":  "未寄出的信·回声",
+                         "entryNodeId":  "n_ch2_000",
+                         "unlockCondition":  "",
+                         "bundle":  "chapter_02"
+                     },
+                     {
+                         "chapterId":  "vn_ch3",
+                         "title":  "逆风公路·霓虹",
+                         "entryNodeId":  "n_ch3_000",
+                         "unlockCondition":  "flag(\"ch1_done\") \u0026\u0026 flag(\"ch2_done\")",
+                         "bundle":  "chapter_03"
+                     }
+                 ],
+    "nodes":  [
+                  {
+                      "nodeId":  "n_ch1_000",
+                      "chapterId":  "vn_ch1",
+                      "type":  "dialog",
+                      "speaker":  "猫",
+                      "text":  "23:59，雨把城市的边缘磨成柔软的噪声。你把手伸进抽屉，摸到一张未干的处方。",
+                      "bgKey":  "bar",
+                      "charId":  "cat",
+                      "bgmKey":  "A",
+                      "sfxKey":  "tap",
+                      "next":  "n_ch1_010",
+                      "rollbackable":  true,
+                      "tags":  [
+                                   "intro"
+                               ],
+                      "effectsOnEnter":  ""
+                  },
+                  {
+                      "nodeId":  "n_ch1_010",
+                      "chapterId":  "vn_ch1",
+                      "type":  "choice",
+                      "speaker":  "镜子",
+                      "text":  "镜面亮起：你要把今天的哪一部分交出去？",
+                      "bgKey":  "desk_rain",
+                      "charId":  "mirror",
+                      "bgmKey":  "hub",
+                      "sfxKey":  "tap",
+                      "next":  "",
+                      "rollbackable":  true,
+                      "tags":  [
+                                   "choice"
+                               ],
+                      "effectsOnEnter":  ""
+                  },
+                  {
+                      "nodeId":  "n_ch1_020",
+                      "chapterId":  "vn_ch1",
+                      "type":  "dialog",
+                      "speaker":  "你",
+                      "text":  "我想把“撑住的那部分”交出去。",
+                      "bgKey":  "desk_rain",
+                      "charId":  "mirror",
+                      "bgmKey":  "hub",
+                      "sfxKey":  "tap",
+                      "next":  "n_ch1_030",
+                      "rollbackable":  true,
+                      "tags":  [
+
+                               ],
+                      "effectsOnEnter":  "add(aff_mirror,1)"
+                  },
+                  {
+                      "nodeId":  "n_ch1_021",
+                      "chapterId":  "vn_ch1",
+                      "type":  "dialog",
+                      "speaker":  "你",
+                      "text":  "我想把“想逃的那部分”交出去。",
+                      "bgKey":  "desk_rain",
+                      "charId":  "mirror",
+                      "bgmKey":  "hub",
+                      "sfxKey":  "tap",
+                      "next":  "n_ch1_040",
+                      "rollbackable":  true,
+                      "tags":  [
+
+                               ],
+                      "effectsOnEnter":  "add(aff_director,1)"
+                  },
+                  {
+                      "nodeId":  "n_ch1_030",
+                      "chapterId":  "vn_ch1",
+                      "type":  "choice",
+                      "speaker":  "猫",
+                      "text":  "好。你愿意留下一句给陌生人的话吗？",
+                      "bgKey":  "bar",
+                      "charId":  "cat",
+                      "bgmKey":  "A",
+                      "sfxKey":  "stamp",
+                      "next":  "",
+                      "rollbackable":  true,
+                      "tags":  [
+                                   "halfprice"
+                               ],
+                      "effectsOnEnter":  ""
+                  },
+                  {
+                      "nodeId":  "n_ch1_040",
+                      "chapterId":  "vn_ch1",
+                      "type":  "choice",
+                      "speaker":  "导演",
+                      "text":  "好。你愿意把发疯写成一句“咒语”吗？",
+                      "bgKey":  "road",
+                      "charId":  "director",
+                      "bgmKey":  "C",
+                      "sfxKey":  "hoof",
+                      "next":  "",
+                      "rollbackable":  true,
+                      "tags":  [
+                                   "spell"
+                               ],
+                      "effectsOnEnter":  ""
+                  },
+                  {
+                      "nodeId":  "n_ch1_e1",
+                      "chapterId":  "vn_ch1",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "雨停之前",
+                      "bgKey":  "bar",
+                      "charId":  "cat",
+                      "bgmKey":  "A",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch1_done"
+                  },
+                  {
+                      "nodeId":  "n_ch1_e2",
+                      "chapterId":  "vn_ch1",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "雨更大了",
+                      "bgKey":  "desk_rain",
+                      "charId":  "mirror",
+                      "bgmKey":  "hub",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch1_done"
+                  },
+                  {
+                      "nodeId":  "n_ch1_e3",
+                      "chapterId":  "vn_ch1",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "把半价留给未来",
+                      "bgKey":  "bar",
+                      "charId":  "cat",
+                      "bgmKey":  "A",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch1_done"
+                  },
+                  {
+                      "nodeId":  "n_ch1_e4",
+                      "chapterId":  "vn_ch1",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "你选择先照顾自己",
+                      "bgKey":  "bar",
+                      "charId":  "cat",
+                      "bgmKey":  "A",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch1_done"
+                  },
+                  {
+                      "nodeId":  "n_ch1_e5",
+                      "chapterId":  "vn_ch1",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "咒语写成了路",
+                      "bgKey":  "road",
+                      "charId":  "director",
+                      "bgmKey":  "C",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch1_done"
+                  },
+                  {
+                      "nodeId":  "n_ch1_e6",
+                      "chapterId":  "vn_ch1",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "咒语写成了墙",
+                      "bgKey":  "road",
+                      "charId":  "director",
+                      "bgmKey":  "C",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch1_done"
+                  },
+                  {
+                      "nodeId":  "n_ch1_e7",
+                      "chapterId":  "vn_ch1",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "镜中镜·雨夜",
+                      "bgKey":  "mirror_council",
+                      "charId":  "mirror",
+                      "bgmKey":  "final",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch1_done,1);set(easter_mirror,1)"
+                  },
+                  {
+                      "nodeId":  "n_ch2_000",
+                      "chapterId":  "vn_ch2",
+                      "type":  "dialog",
+                      "speaker":  "同桌",
+                      "text":  "你把那封信折了又折，折到只剩一个角还在刺你。",
+                      "bgKey":  "letter",
+                      "charId":  "classmate",
+                      "bgmKey":  "B",
+                      "sfxKey":  "tap",
+                      "next":  "n_ch2_010",
+                      "rollbackable":  true,
+                      "tags":  [
+                                   "intro"
+                               ],
+                      "effectsOnEnter":  ""
+                  },
+                  {
+                      "nodeId":  "n_ch2_010",
+                      "chapterId":  "vn_ch2",
+                      "type":  "choice",
+                      "speaker":  "镜子",
+                      "text":  "寄出、塞回、烧掉。你只需要选一个动作。",
+                      "bgKey":  "letter",
+                      "charId":  "mirror",
+                      "bgmKey":  "B",
+                      "sfxKey":  "tap",
+                      "next":  "",
+                      "rollbackable":  true,
+                      "tags":  [
+                                   "choice"
+                               ],
+                      "effectsOnEnter":  ""
+                  },
+                  {
+                      "nodeId":  "n_ch2_020",
+                      "chapterId":  "vn_ch2",
+                      "type":  "dialog",
+                      "speaker":  "你",
+                      "text":  "我想寄出。哪怕没人回。",
+                      "bgKey":  "letter",
+                      "charId":  "classmate",
+                      "bgmKey":  "B",
+                      "sfxKey":  "stamp",
+                      "next":  "n_ch2_030",
+                      "rollbackable":  true,
+                      "tags":  [
+
+                               ],
+                      "effectsOnEnter":  "add(aff_classmate,1);set(flag_send,1)"
+                  },
+                  {
+                      "nodeId":  "n_ch2_021",
+                      "chapterId":  "vn_ch2",
+                      "type":  "dialog",
+                      "speaker":  "你",
+                      "text":  "我想塞回。先别让它变成真。",
+                      "bgKey":  "letter",
+                      "charId":  "mirror",
+                      "bgmKey":  "B",
+                      "sfxKey":  "stamp",
+                      "next":  "n_ch2_040",
+                      "rollbackable":  true,
+                      "tags":  [
+
+                               ],
+                      "effectsOnEnter":  "add(aff_mirror,1);set(flag_putback,1)"
+                  },
+                  {
+                      "nodeId":  "n_ch2_022",
+                      "chapterId":  "vn_ch2",
+                      "type":  "dialog",
+                      "speaker":  "你",
+                      "text":  "我想烧掉。让它结束。",
+                      "bgKey":  "letter",
+                      "charId":  "classmate",
+                      "bgmKey":  "B",
+                      "sfxKey":  "stamp",
+                      "next":  "n_ch2_050",
+                      "rollbackable":  true,
+                      "tags":  [
+
+                               ],
+                      "effectsOnEnter":  "add(aff_classmate,1);set(flag_burn,1)"
+                  },
+                  {
+                      "nodeId":  "n_ch2_030",
+                      "chapterId":  "vn_ch2",
+                      "type":  "choice",
+                      "speaker":  "同桌",
+                      "text":  "你愿意把那句没说出口的，改成5个字吗？",
+                      "bgKey":  "letter",
+                      "charId":  "classmate",
+                      "bgmKey":  "B",
+                      "sfxKey":  "tap",
+                      "next":  "",
+                      "rollbackable":  true,
+                      "tags":  [
+                                   "5word"
+                               ],
+                      "effectsOnEnter":  ""
+                  },
+                  {
+                      "nodeId":  "n_ch2_040",
+                      "chapterId":  "vn_ch2",
+                      "type":  "choice",
+                      "speaker":  "镜子",
+                      "text":  "你愿意把它塞回抽屉，但承认“它存在”吗？",
+                      "bgKey":  "mirror_council",
+                      "charId":  "mirror",
+                      "bgmKey":  "final",
+                      "sfxKey":  "tap",
+                      "next":  "",
+                      "rollbackable":  true,
+                      "tags":  [
+                                   "mirror"
+                               ],
+                      "effectsOnEnter":  ""
+                  },
+                  {
+                      "nodeId":  "n_ch2_050",
+                      "chapterId":  "vn_ch2",
+                      "type":  "choice",
+                      "speaker":  "同桌",
+                      "text":  "烧掉之后，你要给谁写一句“对不起”？",
+                      "bgKey":  "letter",
+                      "charId":  "classmate",
+                      "bgmKey":  "B",
+                      "sfxKey":  "tap",
+                      "next":  "",
+                      "rollbackable":  true,
+                      "tags":  [
+                                   "sorry"
+                               ],
+                      "effectsOnEnter":  ""
+                  },
+                  {
+                      "nodeId":  "n_ch2_e1",
+                      "chapterId":  "vn_ch2",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "回信胜利·寄出",
+                      "bgKey":  "letter",
+                      "charId":  "classmate",
+                      "bgmKey":  "B",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch2_done"
+                  },
+                  {
+                      "nodeId":  "n_ch2_e2",
+                      "chapterId":  "vn_ch2",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "意难平·寄出",
+                      "bgKey":  "letter",
+                      "charId":  "mirror",
+                      "bgmKey":  "B",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch2_done"
+                  },
+                  {
+                      "nodeId":  "n_ch2_e3",
+                      "chapterId":  "vn_ch2",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "抽屉底·塞回",
+                      "bgKey":  "letter",
+                      "charId":  "mirror",
+                      "bgmKey":  "B",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch2_done"
+                  },
+                  {
+                      "nodeId":  "n_ch2_e4",
+                      "chapterId":  "vn_ch2",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "镜中镜·塞回",
+                      "bgKey":  "mirror_council",
+                      "charId":  "mirror",
+                      "bgmKey":  "final",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch2_done,1);set(easter_mirror,1)"
+                  },
+                  {
+                      "nodeId":  "n_ch2_e5",
+                      "chapterId":  "vn_ch2",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "焚信·放下",
+                      "bgKey":  "letter",
+                      "charId":  "classmate",
+                      "bgmKey":  "B",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch2_done"
+                  },
+                  {
+                      "nodeId":  "n_ch2_e6",
+                      "chapterId":  "vn_ch2",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "焚信·再见",
+                      "bgKey":  "letter",
+                      "charId":  "mirror",
+                      "bgmKey":  "B",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch2_done"
+                  },
+                  {
+                      "nodeId":  "n_ch2_e7",
+                      "chapterId":  "vn_ch2",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "合唱谱·彩蛋",
+                      "bgKey":  "desk_rain",
+                      "charId":  "cat",
+                      "bgmKey":  "hub",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch2_done,1);set(easter_chorus,1)"
+                  },
+                  {
+                      "nodeId":  "n_ch3_000",
+                      "chapterId":  "vn_ch3",
+                      "type":  "dialog",
+                      "speaker":  "导演",
+                      "text":  "逆风公路开场：你脚下的每一步都会被放大成一段传说。",
+                      "bgKey":  "road",
+                      "charId":  "director",
+                      "bgmKey":  "C",
+                      "sfxKey":  "tap",
+                      "next":  "n_ch3_010",
+                      "rollbackable":  true,
+                      "tags":  [
+                                   "intro"
+                               ],
+                      "effectsOnEnter":  ""
+                  },
+                  {
+                      "nodeId":  "n_ch3_010",
+                      "chapterId":  "vn_ch3",
+                      "type":  "choice",
+                      "speaker":  "镜子",
+                      "text":  "你想成为“被看见”的人，还是“活下去”的人？",
+                      "bgKey":  "road",
+                      "charId":  "mirror",
+                      "bgmKey":  "C",
+                      "sfxKey":  "tap",
+                      "next":  "",
+                      "rollbackable":  true,
+                      "tags":  [
+                                   "choice"
+                               ],
+                      "effectsOnEnter":  ""
+                  },
+                  {
+                      "nodeId":  "n_ch3_020",
+                      "chapterId":  "vn_ch3",
+                      "type":  "dialog",
+                      "speaker":  "你",
+                      "text":  "我想被看见。",
+                      "bgKey":  "road",
+                      "charId":  "director",
+                      "bgmKey":  "C",
+                      "sfxKey":  "hoof",
+                      "next":  "n_ch3_030",
+                      "rollbackable":  true,
+                      "tags":  [
+
+                               ],
+                      "effectsOnEnter":  "add(aff_director,1);add(philo,1)"
+                  },
+                  {
+                      "nodeId":  "n_ch3_021",
+                      "chapterId":  "vn_ch3",
+                      "type":  "dialog",
+                      "speaker":  "你",
+                      "text":  "我想活下去。",
+                      "bgKey":  "road",
+                      "charId":  "cat",
+                      "bgmKey":  "C",
+                      "sfxKey":  "hoof",
+                      "next":  "n_ch3_040",
+                      "rollbackable":  true,
+                      "tags":  [
+
+                               ],
+                      "effectsOnEnter":  "add(aff_cat,1);add(philo,1)"
+                  },
+                  {
+                      "nodeId":  "n_ch3_030",
+                      "chapterId":  "vn_ch3",
+                      "type":  "choice",
+                      "speaker":  "导演",
+                      "text":  "称王前，你愿意先“给予”一次吗？",
+                      "bgKey":  "bar",
+                      "charId":  "cat",
+                      "bgmKey":  "A",
+                      "sfxKey":  "stamp",
+                      "next":  "",
+                      "rollbackable":  true,
+                      "tags":  [
+                                   "give"
+                               ],
+                      "effectsOnEnter":  ""
+                  },
+                  {
+                      "nodeId":  "n_ch3_040",
+                      "chapterId":  "vn_ch3",
+                      "type":  "choice",
+                      "speaker":  "猫",
+                      "text":  "逃亡前，你愿意先“寄出”一次吗？",
+                      "bgKey":  "letter",
+                      "charId":  "classmate",
+                      "bgmKey":  "B",
+                      "sfxKey":  "stamp",
+                      "next":  "",
+                      "rollbackable":  true,
+                      "tags":  [
+                                   "send"
+                               ],
+                      "effectsOnEnter":  ""
+                  },
+                  {
+                      "nodeId":  "n_ch3_e1",
+                      "chapterId":  "vn_ch3",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "逆风王·称王",
+                      "bgKey":  "road",
+                      "charId":  "director",
+                      "bgmKey":  "C",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch3_done,1);set(easter_crown,1)"
+                  },
+                  {
+                      "nodeId":  "n_ch3_e2",
+                      "chapterId":  "vn_ch3",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "逆风王·失败",
+                      "bgKey":  "road",
+                      "charId":  "mirror",
+                      "bgmKey":  "C",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch3_done"
+                  },
+                  {
+                      "nodeId":  "n_ch3_e3",
+                      "chapterId":  "vn_ch3",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "逃亡胜利·不停下",
+                      "bgKey":  "road",
+                      "charId":  "cat",
+                      "bgmKey":  "C",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch3_done"
+                  },
+                  {
+                      "nodeId":  "n_ch3_e4",
+                      "chapterId":  "vn_ch3",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "回撤胜利·停下也算",
+                      "bgKey":  "bar",
+                      "charId":  "cat",
+                      "bgmKey":  "A",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch3_done"
+                  },
+                  {
+                      "nodeId":  "n_ch3_e5",
+                      "chapterId":  "vn_ch3",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "高速·霓虹",
+                      "bgKey":  "road",
+                      "charId":  "director",
+                      "bgmKey":  "C",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch3_done"
+                  },
+                  {
+                      "nodeId":  "n_ch3_e6",
+                      "chapterId":  "vn_ch3",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "隧道·回声",
+                      "bgKey":  "road",
+                      "charId":  "mirror",
+                      "bgmKey":  "C",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch3_done"
+                  },
+                  {
+                      "nodeId":  "n_ch3_e7",
+                      "chapterId":  "vn_ch3",
+                      "type":  "ending",
+                      "speaker":  "",
+                      "text":  "谷雨破局·彩蛋",
+                      "bgKey":  "desk_rain",
+                      "charId":  "mirror",
+                      "bgmKey":  "final",
+                      "sfxKey":  "crown",
+                      "next":  "",
+                      "rollbackable":  false,
+                      "tags":  [
+                                   "ending"
+                               ],
+                      "effectsOnEnter":  "set(flag_ch3_done,1);set(easter_guyu,1)"
+                  }
+              ],
+    "choices":  [
+                    {
+                        "choiceId":  "c_ch1_010_a",
+                        "nodeId":  "n_ch1_010",
+                        "text":  "交出“撑住的那部分”",
+                        "condition":  "",
+                        "effects":  "add(flag_support,1)",
+                        "jumpToNodeId":  "n_ch1_020",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch1_010_b",
+                        "nodeId":  "n_ch1_010",
+                        "text":  "交出“想逃的那部分”",
+                        "condition":  "",
+                        "effects":  "add(flag_escape,1)",
+                        "jumpToNodeId":  "n_ch1_021",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch1_030_a",
+                        "nodeId":  "n_ch1_030",
+                        "text":  "留半价留言（回声+1）",
+                        "condition":  "",
+                        "effects":  "add(echo,1);add(philo,1)",
+                        "jumpToNodeId":  "n_ch1_e3",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch1_030_b",
+                        "nodeId":  "n_ch1_030",
+                        "text":  "不留（先照顾自己）",
+                        "condition":  "",
+                        "effects":  "add(selfcare,1)",
+                        "jumpToNodeId":  "n_ch1_e4",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch1_030_c",
+                        "nodeId":  "n_ch1_030",
+                        "text":  "雨夜里对镜子说真话",
+                        "condition":  "flag(\"flag_support\")",
+                        "effects":  "set(easter_mirror,1)",
+                        "jumpToNodeId":  "n_ch1_e7",
+                        "hidden":  true
+                    },
+                    {
+                        "choiceId":  "c_ch1_040_a",
+                        "nodeId":  "n_ch1_040",
+                        "text":  "写下咒语（称王概率+）",
+                        "condition":  "",
+                        "effects":  "add(spell,1)",
+                        "jumpToNodeId":  "n_ch1_e5",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch1_040_b",
+                        "nodeId":  "n_ch1_040",
+                        "text":  "不写（回到现实）",
+                        "condition":  "",
+                        "effects":  "add(wall,1)",
+                        "jumpToNodeId":  "n_ch1_e6",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch1_040_c",
+                        "nodeId":  "n_ch1_040",
+                        "text":  "让镜子替你写",
+                        "condition":  "flag(\"flag_escape\") \u0026\u0026 flag(\"easter_mirror\")",
+                        "effects":  "add(philo,2)",
+                        "jumpToNodeId":  "n_ch1_e1",
+                        "hidden":  true
+                    },
+                    {
+                        "choiceId":  "c_ch2_010_a",
+                        "nodeId":  "n_ch2_010",
+                        "text":  "寄出",
+                        "condition":  "",
+                        "effects":  "set(choice_send,1)",
+                        "jumpToNodeId":  "n_ch2_020",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch2_010_b",
+                        "nodeId":  "n_ch2_010",
+                        "text":  "塞回抽屉",
+                        "condition":  "",
+                        "effects":  "set(choice_putback,1)",
+                        "jumpToNodeId":  "n_ch2_021",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch2_010_c",
+                        "nodeId":  "n_ch2_010",
+                        "text":  "烧掉",
+                        "condition":  "",
+                        "effects":  "set(choice_burn,1)",
+                        "jumpToNodeId":  "n_ch2_022",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch2_030_a",
+                        "nodeId":  "n_ch2_030",
+                        "text":  "改成：\"我还在这\"",
+                        "condition":  "",
+                        "effects":  "add(philo,1)",
+                        "jumpToNodeId":  "n_ch2_e1",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch2_030_b",
+                        "nodeId":  "n_ch2_030",
+                        "text":  "改成：\"请原谅我\"",
+                        "condition":  "",
+                        "effects":  "add(philo,1)",
+                        "jumpToNodeId":  "n_ch2_e2",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch2_030_c",
+                        "nodeId":  "n_ch2_030",
+                        "text":  "改成：\"谢谢你啊\"",
+                        "condition":  "flag(\"easter_chorus\")",
+                        "effects":  "set(easter_chorus,1)",
+                        "jumpToNodeId":  "n_ch2_e7",
+                        "hidden":  true
+                    },
+                    {
+                        "choiceId":  "c_ch2_040_a",
+                        "nodeId":  "n_ch2_040",
+                        "text":  "承认它存在（裂纹-）",
+                        "condition":  "",
+                        "effects":  "add(philo,1)",
+                        "jumpToNodeId":  "n_ch2_e3",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch2_040_b",
+                        "nodeId":  "n_ch2_040",
+                        "text":  "继续塞回（裂纹+）",
+                        "condition":  "",
+                        "effects":  "add(flag_putback_streak,1)",
+                        "jumpToNodeId":  "n_ch2_e4",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch2_050_a",
+                        "nodeId":  "n_ch2_050",
+                        "text":  "写给过去的自己",
+                        "condition":  "",
+                        "effects":  "add(philo,1)",
+                        "jumpToNodeId":  "n_ch2_e5",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch2_050_b",
+                        "nodeId":  "n_ch2_050",
+                        "text":  "写给那个没回信的人",
+                        "condition":  "",
+                        "effects":  "add(philo,1)",
+                        "jumpToNodeId":  "n_ch2_e6",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch3_010_a",
+                        "nodeId":  "n_ch3_010",
+                        "text":  "我要被看见",
+                        "condition":  "",
+                        "effects":  "set(style_rage,1)",
+                        "jumpToNodeId":  "n_ch3_020",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch3_010_b",
+                        "nodeId":  "n_ch3_010",
+                        "text":  "我要活下去",
+                        "condition":  "",
+                        "effects":  "set(style_steady,1)",
+                        "jumpToNodeId":  "n_ch3_021",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch3_030_a",
+                        "nodeId":  "n_ch3_030",
+                        "text":  "先给予一次（猫线）",
+                        "condition":  "",
+                        "effects":  "add(give,1)",
+                        "jumpToNodeId":  "n_ch3_e4",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch3_030_b",
+                        "nodeId":  "n_ch3_030",
+                        "text":  "不等了，直接称王",
+                        "condition":  "",
+                        "effects":  "add(king_try,1)",
+                        "jumpToNodeId":  "n_ch3_e1",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch3_030_c",
+                        "nodeId":  "n_ch3_030",
+                        "text":  "把王冠送给镜子",
+                        "condition":  "flag(\"easter_mirror\")",
+                        "effects":  "set(easter_crown,1)",
+                        "jumpToNodeId":  "n_ch3_e7",
+                        "hidden":  true
+                    },
+                    {
+                        "choiceId":  "c_ch3_040_a",
+                        "nodeId":  "n_ch3_040",
+                        "text":  "先寄出一次（信线）",
+                        "condition":  "",
+                        "effects":  "add(send,1)",
+                        "jumpToNodeId":  "n_ch3_e3",
+                        "hidden":  false
+                    },
+                    {
+                        "choiceId":  "c_ch3_040_b",
+                        "nodeId":  "n_ch3_040",
+                        "text":  "直接上路",
+                        "condition":  "",
+                        "effects":  "add(run,1)",
+                        "jumpToNodeId":  "n_ch3_e5",
+                        "hidden":  false
+                    }
+                ],
+    "assets":  [
+                   {
+                       "assetId":  "bg_desk_rain",
+                       "type":  "bg",
+                       "path":  "internal:desk_rain",
+                       "bundle":  "base"
+                   },
+                   {
+                       "assetId":  "bg_bar",
+                       "type":  "bg",
+                       "path":  "internal:bar",
+                       "bundle":  "base"
+                   },
+                   {
+                       "assetId":  "bg_letter",
+                       "type":  "bg",
+                       "path":  "internal:letter",
+                       "bundle":  "base"
+                   },
+                   {
+                       "assetId":  "bg_road",
+                       "type":  "bg",
+                       "path":  "internal:road",
+                       "bundle":  "base"
+                   },
+                   {
+                       "assetId":  "bg_mirror_council",
+                       "type":  "bg",
+                       "path":  "internal:mirror_council",
+                       "bundle":  "base"
+                   },
+                   {
+                       "assetId":  "char_cat",
+                       "type":  "char",
+                       "path":  "internal:cat",
+                       "bundle":  "base"
+                   },
+                   {
+                       "assetId":  "char_mirror",
+                       "type":  "char",
+                       "path":  "internal:mirror",
+                       "bundle":  "base"
+                   },
+                   {
+                       "assetId":  "char_classmate",
+                       "type":  "char",
+                       "path":  "internal:classmate",
+                       "bundle":  "base"
+                   },
+                   {
+                       "assetId":  "char_director",
+                       "type":  "char",
+                       "path":  "internal:director",
+                       "bundle":  "base"
+                   },
+                   {
+                       "assetId":  "bgm_hub",
+                       "type":  "bgm",
+                       "path":  "internal:hub",
+                       "bundle":  "base"
+                   },
+                   {
+                       "assetId":  "bgm_A",
+                       "type":  "bgm",
+                       "path":  "internal:A",
+                       "bundle":  "base"
+                   },
+                   {
+                       "assetId":  "bgm_B",
+                       "type":  "bgm",
+                       "path":  "internal:B",
+                       "bundle":  "base"
+                   },
+                   {
+                       "assetId":  "bgm_C",
+                       "type":  "bgm",
+                       "path":  "internal:C",
+                       "bundle":  "base"
+                   },
+                   {
+                       "assetId":  "bgm_final",
+                       "type":  "bgm",
+                       "path":  "internal:final",
+                       "bundle":  "base"
+                   },
+                   {
+                       "assetId":  "sfx_tap",
+                       "type":  "sfx",
+                       "path":  "internal:tap",
+                       "bundle":  "base"
+                   },
+                   {
+                       "assetId":  "sfx_stamp",
+                       "type":  "sfx",
+                       "path":  "internal:stamp",
+                       "bundle":  "base"
+                   },
+                   {
+                       "assetId":  "sfx_hoof",
+                       "type":  "sfx",
+                       "path":  "internal:hoof",
+                       "bundle":  "base"
+                   },
+                   {
+                       "assetId":  "sfx_crown",
+                       "type":  "sfx",
+                       "path":  "internal:crown",
+                       "bundle":  "base"
+                   }
+               ]
+}

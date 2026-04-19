@@ -1,0 +1,5 @@
+chapterId,title,entryNodeId,unlockCondition,bundle
+vn_ch1,雨夜回声·序曲,n_ch1_000,,chapter_01
+vn_ch2,未寄出的信·回声,n_ch2_000,,chapter_02
+vn_ch3,逆风公路·霓虹,n_ch3_000,flag("ch1_done") && flag("ch2_done"),chapter_03
+

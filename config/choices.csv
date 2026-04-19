@@ -1,0 +1,35 @@
+choiceId,nodeId,text,condition,effects,jumpToNodeId,hidden
+c_ch1_010_a,n_ch1_010,交出“撑住的那部分”,,"add(flag_support,1)",n_ch1_020,0
+c_ch1_010_b,n_ch1_010,交出“想逃的那部分”,,"add(flag_escape,1)",n_ch1_021,0
+
+c_ch1_030_a,n_ch1_030,留半价留言（回声+1）, ,"add(echo,1);add(philo,1)",n_ch1_e3,0
+c_ch1_030_b,n_ch1_030,不留（先照顾自己）, ,"add(selfcare,1)",n_ch1_e4,0
+c_ch1_030_c,n_ch1_030,雨夜里对镜子说真话,flag("flag_support"),"set(easter_mirror,1)",n_ch1_e7,1
+
+c_ch1_040_a,n_ch1_040,写下咒语（称王概率+）, ,"add(spell,1)",n_ch1_e5,0
+c_ch1_040_b,n_ch1_040,不写（回到现实）, ,"add(wall,1)",n_ch1_e6,0
+c_ch1_040_c,n_ch1_040,让镜子替你写,flag("flag_escape") && flag("easter_mirror"),"add(philo,2)",n_ch1_e1,1
+
+c_ch2_010_a,n_ch2_010,寄出, ,"set(choice_send,1)",n_ch2_020,0
+c_ch2_010_b,n_ch2_010,塞回抽屉, ,"set(choice_putback,1)",n_ch2_021,0
+c_ch2_010_c,n_ch2_010,烧掉, ,"set(choice_burn,1)",n_ch2_022,0
+
+c_ch2_030_a,n_ch2_030,改成："我还在这",,"add(philo,1)",n_ch2_e1,0
+c_ch2_030_b,n_ch2_030,改成："请原谅我",,"add(philo,1)",n_ch2_e2,0
+c_ch2_030_c,n_ch2_030,改成："谢谢你啊",flag("easter_chorus"),"set(easter_chorus,1)",n_ch2_e7,1
+
+c_ch2_040_a,n_ch2_040,承认它存在（裂纹-）, ,"add(philo,1)",n_ch2_e3,0
+c_ch2_040_b,n_ch2_040,继续塞回（裂纹+）, ,"add(flag_putback_streak,1)",n_ch2_e4,0
+
+c_ch2_050_a,n_ch2_050,写给过去的自己, ,"add(philo,1)",n_ch2_e5,0
+c_ch2_050_b,n_ch2_050,写给那个没回信的人, ,"add(philo,1)",n_ch2_e6,0
+
+c_ch3_010_a,n_ch3_010,我要被看见, ,"set(style_rage,1)",n_ch3_020,0
+c_ch3_010_b,n_ch3_010,我要活下去, ,"set(style_steady,1)",n_ch3_021,0
+
+c_ch3_030_a,n_ch3_030,先给予一次（猫线）, ,"add(give,1)",n_ch3_e4,0
+c_ch3_030_b,n_ch3_030,不等了，直接称王, ,"add(king_try,1)",n_ch3_e1,0
+c_ch3_030_c,n_ch3_030,把王冠送给镜子,flag("easter_mirror"),"set(easter_crown,1)",n_ch3_e7,1
+
+c_ch3_040_a,n_ch3_040,先寄出一次（信线）, ,"add(send,1)",n_ch3_e3,0
+c_ch3_040_b,n_ch3_040,直接上路, ,"add(run,1)",n_ch3_e5,0

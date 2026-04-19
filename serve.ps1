@@ -1,0 +1,38 @@
+$ErrorActionPreference = 'Stop'
+
+$prefix = 'http://localhost:8000/'
+$root = (Get-Location).Path
+
+$listener = [System.Net.HttpListener]::new()
+$listener.Prefixes.Add($prefix)
+$listener.Start()
+Write-Host ("LISTENING " + $prefix + " ROOT " + $root)
+
+try {
+  while ($listener.IsListening) {
+    $ctx = $listener.GetContext()
+    try {
+      $p = $ctx.Request.Url.AbsolutePath.TrimStart('/')
+      if ([string]::IsNullOrWhiteSpace($p)) { $p = 'index.html' }
+      $fp = Join-Path $root $p
+      if (Test-Path $fp) {
+        $bytes = [System.IO.File]::ReadAllBytes($fp)
+        $ext = [System.IO.Path]::GetExtension($fp).ToLowerInvariant()
+        $ct = if ($ext -eq '.html') { 'text/html; charset=utf-8' } elseif ($ext -eq '.js') { 'application/javascript; charset=utf-8' } elseif ($ext -eq '.css') { 'text/css; charset=utf-8' } else { 'application/octet-stream' }
+        $ctx.Response.ContentType = $ct
+        $ctx.Response.StatusCode = 200
+        $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
+      } else {
+        $ctx.Response.StatusCode = 404
+      }
+    } catch {
+      $ctx.Response.StatusCode = 500
+    } finally {
+      $ctx.Response.OutputStream.Close()
+    }
+  }
+} finally {
+  $listener.Stop()
+  $listener.Close()
+}
+
